@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>Listicles</title>
+        <link rel=stylesheet type=text/css href="static/styles.css">
+    </head>
+    <body>
+        <div id="container">
+            <div class="title">
+                <h1>Listicles</h1>
+            </div>
+            <div id="content">
+                <form method="post" action="{{ url_for('List') }}">
+                  <label for="yourname">List Me:</label>
+                  <input type="text" name="yourname" /><br />
+                  <input type="submit" />
+                </form>
+            </div>
+</html>
+ 
