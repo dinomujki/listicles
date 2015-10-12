@@ -22,7 +22,13 @@ def List():
     link=request.form['prompt']
     html=urllib.urlopen(link).read()
     soup=BeautifulSoup(html)
-    return render_template('form_action.html', name=soup.prettify()[0:1000])
+    l = soup.find_all('tbody', class_='lister-list')[0]
+    items = l.find_all('td', class_='titleColumn')[0:10]
+    content = ""
+    for item in items:
+      content += str(item.find('a').contents[0])) + "\n"
+  
+    return render_template('form_action.html', name=content)
 
 
 # Run the app :)
