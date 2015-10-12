@@ -19,7 +19,7 @@ def form():
 # accepting: POST requests in this case
 @app.route('/List/', methods=['POST'])
 def List():
-    link=request.form['yourname']
+    link=request.form['prompt']
     html=urllib.urlopen(link).read()
     soup=BeautifulSoup(html)
     return render_template('form_action.html', name=soup.prettify()[0:1000])
