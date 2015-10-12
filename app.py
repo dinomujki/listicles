@@ -23,12 +23,12 @@ def List():
     html=urllib.urlopen(link).read()
     soup=BeautifulSoup(html)
     l = soup.find_all('tbody', class_='lister-list')[0]
-    items = l.find_all('td', class_='titleColumn')[0:10]
-    content = ""
-    for item in items:
-      content += str(item.find('a').contents[0])) + "\n"
+    rawitems = l.find_all('td', class_='titleColumn')[0:10]
+    items = []
+    for item in rawitems:
+      items.append(str(item.find('a').contents[0]))
   
-    return render_template('form_action.html', name=content)
+    return render_template('form_action.html', name0=items[0], name1=items[1], name2=items[2],name3=items[3],name4=items[4],name5=items[5],name6=items[6],name7=items[7],name8=items[8],name9=items[9])
 
 
 # Run the app :)
