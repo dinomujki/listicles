@@ -22,14 +22,18 @@ def List():
     link=request.form['prompt']
     html=urllib.urlopen(link).read()
     soup=BeautifulSoup(html)
-    l = soup.find_all('tbody', class_='lister-list')[0]
-    rawitems = l.find_all('td', class_='titleColumn')[0:10]
+    l = soup.find_all('div', class_='article')[0]
+    print l
+    # tbody = l.find_all('tbody')[0]
+    rawitems = l.find_all('td', class_="title")[0:10]
     items = []
     for item in rawitems:
-      items.append(str(item.find('a').contents[0]))
+      title = item.find('a').contents[0]
+      desc = item.find('span', class_='outline').get_text()
+      items.append(str(title) + ": " + str(desc))
   
     return render_template('form_action.html', name0=items[0], name1=items[1], name2=items[2],name3=items[3],name4=items[4],name5=items[5],name6=items[6],name7=items[7],name8=items[8],name9=items[9])
-
+    # return render_template('form_action.html', name=rawitems)
 
 # Run the app :)
 if __name__ == '__main__':
