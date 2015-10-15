@@ -16,10 +16,18 @@ a {
     font-weight: normal;
 }
 
+#container{
+    padding: 25px;
+}
+
 .title {
     position: relative;
     text-align: center;
     padding-top: 200px;
+}
+
+#result-title {
+    padding-top: 0px;
 }
 
 .title h1 {
@@ -77,3 +85,19 @@ form input[type=submit]{
     cursor: pointer;
     text-align: center;
 } 
+
+
+#results {
+    width: 80%;
+    margin: auto;
+}
+
+#results p {
+    font-size: 1.2em;
+
+}
+
+#results h1{
+    padding: 0;
+    margin: 0;
+}

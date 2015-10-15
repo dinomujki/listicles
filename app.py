@@ -20,19 +20,21 @@ def form():
 @app.route('/List/', methods=['POST'])
 def List():
     link=request.form['prompt']
-    html=urllib.urlopen(link).read()
+    url = "http://www.imdb.com/genre/" + str(link)
+    html=urllib.urlopen(url).read()
     soup=BeautifulSoup(html)
     l = soup.find_all('div', class_='article')[0]
     print l
     # tbody = l.find_all('tbody')[0]
     rawitems = l.find_all('td', class_="title")[0:10]
-    items = []
+    names = []
+    descs= []
     for item in rawitems:
-      title = item.find('a').contents[0]
-      desc = item.find('span', class_='outline').get_text()
-      items.append(str(title) + ": " + str(desc))
+      names.append(str(item.find('a').contents[0]))
+      descs.append(str(item.find('span', class_='outline').get_text()))
+
   
-    return render_template('form_action.html', name0=items[0], name1=items[1], name2=items[2],name3=items[3],name4=items[4],name5=items[5],name6=items[6],name7=items[7],name8=items[8],name9=items[9])
+    return render_template('form_action.html', prompt=link, name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9])
     # return render_template('form_action.html', name=rawitems)
 
 # Run the app :)
