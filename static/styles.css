@@ -101,3 +101,19 @@ form input[type=submit]{
     padding: 0;
     margin: 0;
 }
+
+div.description > *{
+    vertical-align: top;
+}
+div.textd{
+    width:70%;
+    height: 300px;
+    display: inline-block;
+}
+div.textd p {
+    margin:0;
+}
+
+div.imaged{
+    display: inline-block;
+}

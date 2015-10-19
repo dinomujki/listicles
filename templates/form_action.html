@@ -9,27 +9,30 @@
                 <h1>Listicle - {{prompt}}</h1>
             </div>
             <div id="results">
-                <h2>1. {{name0}}</h2>
-                <p>{{desc0}}</p>
-                <h2>2. {{name1}}</h2>
-                <p>{{desc1}}</p>
-                <h2>3. {{name2}}</h2>
-                <p>{{desc2}}</p>
-                <h2>4. {{name3}}</h2>
-                <p>{{desc3}}</p>
-                <h2>5. {{name4}}</h2>
-                <p>{{desc4}}</p>
-                <h2>6. {{name5}}</h2>
-                <p>{{desc5}}</p>
-                <h2>7. {{name6}}</h2>
-                <p>{{desc6}}</p>
-                <h2>8. {{name7}}</h2>
-                <p>{{desc7}}</p>
-                <h2>9. {{name8}}</h2>
-                <p>{{desc8}}</p>
-                <h2>10. {{name9}}</h2>
-                <p>{{desc9}}</p>
+                <h2>1. {{name0|safe}}</h2>
+                <div class="description">
+                    <div class="textd">{{desc0|safe}}</div>
+                    <div class="imaged">{{image0|safe}}</div>
+                </div>
 
+                <h2>2. {{name1|safe}}</h2>
+                <p>{{desc1|safe}}</p>
+                <h2>3. {{name2|safe}}</h2>
+                <p>{{desc2|safe}}</p>
+                <h2>4. {{name3|safe}}</h2>
+                <p>{{desc3|safe}}</p>
+                <h2>5. {{name4|safe}}</h2>
+                <p>{{desc4|safe}}</p>
+                <h2>6. {{name5|safe}}</h2>
+                <p>{{desc5|safe}}</p>
+                <h2>7. {{name6|safe}}</h2>
+                <p>{{desc6|safe}}</p>
+                <h2>8. {{name7|safe}}</h2>
+                <p>{{desc7|safe}}</p>
+                <h2>9. {{name8|safe}}</h2>
+                <p>{{desc8|safe}}</p>
+                <h2>10. {{name9|safe}}</h2>
+                <p>{{desc9|safe}}</p>
             </div>
             
 </html>
