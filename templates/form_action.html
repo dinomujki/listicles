@@ -5,8 +5,10 @@
     </head>
     <body>
         <div id="container">
+            <div class="wiki">{{wikiurl|safe}}</div>
             <div class="title" id="result-title">
-                <h1>Listicle - {{prompt}}</h1>
+                <h1>Listicle - {{prompt|safe}}</h1>
+            
             </div>
             <div id="results">
                 <h2>1. {{name0|safe}}</h2>
@@ -14,7 +16,7 @@
                     <div class="textd">{{desc0|safe}}</div>
                     <div class="imaged">{{image0|safe}}</div>
                 </div>
-
+                
                 <h2>2. {{name1|safe}}</h2>
                 <div class="description">
                     <div class="textd">{{desc1|safe}}</div>
