@@ -50,7 +50,6 @@ def List():
     descs = []
     imgs = []
     counter = 0
-<<<<<<< Updated upstream
 
     for item in rawitems:
         if counter == 10:
@@ -102,51 +101,7 @@ def List():
     # return render_template('form_action.html', prompt=prompt,name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9])
     # return render_template('form_action.html', prompt=prompt,name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9])
     # return render_template('form_action.html', prompt=prompt)
-=======
-      
-    bingurl = "https://www.bing.com/search?q=wikipedia+top+10+films+"+str(prompt)
-    searchrequest = urllib2.Request(bingurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
-    urlfile = urllib2.urlopen(searchrequest)
-    page = urlfile.read()
-    soup = BeautifulSoup(page)
-    k=soup.find('ol', id="b_results").a['href']
-    wikiurl=k
 
-
-    # for item in rawitems:
-    #   name = item.find('a')
-    #   name['href']="http://www.imdb.com/"+name['href']
-    #   names.append(name)
-      
-    #   # names[counter]="http://www.imdb.com/"+names[counter]
-    #   googlenames = str(item.find('a').get_text())
-    #   googlenameslist = googlenames.split()
-    #   googlenames = "+".join(googlenameslist)
-    #   # googleurl = "https://www.google.com/search?q=wikipedia+"+str(googlenames)+"+film+"+str(prompt)
-    #   bingurl = "https://www.bing.com/search?q=wikipedia+"+str(googlenames)+"+film+"+str(prompt)
-    #   searchrequest = urllib2.Request(bingurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
-    #   urlfile = urllib2.urlopen(searchrequest)
-    #   page = urlfile.read()
-      
-    #   soup=BeautifulSoup(page)
-    #   wikiurl=soup.find('div', class_="b_attribution").get_text()
-    #   wikiurl="https://"+str(wikiurl)
-    #   # wikiurl=wikiurl.find('a')
-    #   # wikiurl=wikiurl['href']
-
-    #   deschtml=urllib.urlopen(wikiurl).read()
-    #   soup=BeautifulSoup(deschtml)
-    #   k=(soup.find('div', class_='mw-content-ltr')).find('p')
-    #   descs.append(k)
-
-    #   img=(soup.find('div', class_='mw-content-ltr')).find('img')
-    #   imgs.append(img)
-    #   counter=counter+1
-
-  
-    # return render_template('form_action.html', prompt=prompt, image0 = imgs[0], image1=imgs[1], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9])
-    return render_template('form_action.html', wikiurl=wikiurl)
->>>>>>> Stashed changes
 
 # Run the app :)
 if __name__ == '__main__':
