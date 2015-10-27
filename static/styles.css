@@ -3,8 +3,8 @@
 ::webkit-selection{ background-color: #E13300; color: white; }
 
 body {
-    background: url(bg1.jpg) no-repeat;
-	font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+    background: url("http://i64.tinypic.com/2rqequx.jpg") no-repeat;
+    font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
     color: #888;
     font-style: normal;
     font-size: 14px;
