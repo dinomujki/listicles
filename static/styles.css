@@ -3,11 +3,12 @@
 ::webkit-selection{ background-color: #E13300; color: white; }
 
 body {
-    font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+    background: url(bg1.jpg) no-repeat;
+	font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
     color: #888;
     font-style: normal;
     font-size: 14px;
-    line-height: 22px;
+    line-height: 20px;
 }
 
 a {
@@ -16,28 +17,35 @@ a {
     font-weight: normal;
 }
 
-#container{
-    padding: 25px;
-}
-
 .title {
     position: relative;
     text-align: center;
-    padding-top: 200px;
-}
-
-#result-title {
-    padding-top: 0px;
+    padding-top: 100px;
 }
 
 .title h1 {
-    font-size: 3em;
+	font-family: 'Mr Dafoe', cursive;
+    font-size: 7em;
     font-weight: 300;
+	color: #FFF;
 }
 
+.content h4{
+	font-size: 2em;
+    font-weight: 300;
+	color: #FFF;
+	padding-top: 60px;
+}
 
 div.content {
     text-align: center;
+}
+.content p
+{
+	color: #FFF;
+	font-size: 16px;
+	padding-top: 50px;
+	font-family: 'Open Sans', sans-serif;
 }
 
 form {
@@ -85,35 +93,3 @@ form input[type=submit]{
     cursor: pointer;
     text-align: center;
 } 
-
-
-#results {
-    width: 80%;
-    margin: auto;
-}
-
-#results p {
-    font-size: 1.2em;
-
-}
-
-#results h1{
-    padding: 0;
-    margin: 0;
-}
-
-div.description > *{
-    vertical-align: top;
-}
-div.textd{
-    width:70%;
-    height: 300px;
-    display: inline-block;
-}
-div.textd p {
-    margin:0;
-}
-
-div.imaged{
-    display: inline-block;
-}
