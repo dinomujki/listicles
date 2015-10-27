@@ -2,17 +2,23 @@
     <head>
         <title>Listicles</title>
         <link rel=stylesheet type=text/css href="/static/styles.css">
+		<link href='http://fonts.googleapis.com/css?family=Mr+Dafoe' rel='stylesheet' type='text/css'>
     </head>
     <body>
-        <div id="container">
-            <div class="title">
-                <h1>Listicles</h1>
-            </div>
-            <div id="content">
-                <form method="post" action="{{ url_for('List') }}">
+		<div class="content">
+				<div class="title">
+					<h1>Listicles</h1></a>
+				</div>
+				<h4>Lists just got more interesting &#33;</h4>
+				<div class="form">
+				  <form method="post" action="{{ url_for('List') }}">
                   <label for="prompt"></label>
                   <input type="text" name="prompt" /><br />
-                  <input type="submit" value="List Me" />
-                </form>
-            </div>
+                  <input type="submit" value="List Me !" />
+				</form>
+				</div>
+				<p> 2015 Northwestern University - Diane, Aishwarya & Dino </p>
+				
+		</div>
+	</body>
 </html>
