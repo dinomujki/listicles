@@ -1,0 +1,69 @@
+::selection{ background-color: #E13300; color: white; }
+::moz-selection{ background-color: #E13300; color: white; }
+::webkit-selection{ background-color: #E13300; color: white; }
+
+body {
+    font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+    color: #888;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+a {
+    color: #003399;
+    background-color: transparent;
+    font-weight: normal;
+}
+
+#container{
+    padding: 20px;
+}
+
+.title {
+    position: relative;
+    text-align: center;
+    padding-top: 100px;
+}
+
+#result-title {
+    padding-top: 0px;
+	font-size: 26px;
+	color: #000;
+}
+
+div.content {
+    text-align: center;
+}
+
+#results {
+    width: 80%;
+    margin: auto;
+}
+
+#results p {
+    font-size: 1.2em;
+
+}
+
+#results h1{
+    padding: 0;
+    margin: 0;
+	text-color: #000
+}
+
+div.description > *{
+    vertical-align: top;
+}
+div.textd{
+    width:70%;
+    height: 300px;
+    display: inline-block;
+}
+div.textd p {
+    margin:0;
+}
+
+div.imaged{
+    display: inline-block;
+}
