@@ -4,10 +4,12 @@
 
 body {
     font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
-    color: #888;
+    color: black;
     font-style: normal;
     font-size: 14px;
     line-height: 20px;
+    margin: 0px;
+    margin-top: 30px;
 }
 
 a {
@@ -17,7 +19,7 @@ a {
 }
 
 #container{
-    padding: 20px;
+    padding: 0px;
 }
 
 .title {
@@ -41,6 +43,15 @@ div.content {
     margin: auto;
 }
 
+#general {
+    background-color: silver;
+    width: 70%;
+    padding-left: 10%; 
+    padding-right: 20%;
+    padding-bottom: 50px;
+    padding-top: 20px;
+    font-size: 1.1em;
+}
 #results p {
     font-size: 1.2em;
 

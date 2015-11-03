@@ -3,7 +3,8 @@
 ::webkit-selection{ background-color: #E13300; color: white; }
 
 body {
-    background: url("http://i64.tinypic.com/2rqequx.jpg") no-repeat;
+    /*background: url("http://i64.tinypic.com/2rqequx.jpg") no-repeat;*/
+    background-color:transparent;
     font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
     color: #888;
     font-style: normal;
@@ -26,14 +27,14 @@ a {
 .title h1 {
 	font-family: 'Mr Dafoe', cursive;
     font-size: 7em;
-    font-weight: 300;
-	color: #FFF;
+    font-weight: lighter;
+	color: black;
 }
 
 .content h4{
 	font-size: 2em;
     font-weight: 300;
-	color: #FFF;
+	color: silver;
 	padding-top: 60px;
 }
 
