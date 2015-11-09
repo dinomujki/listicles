@@ -5,9 +5,16 @@ from flask import Flask, render_template, request, url_for
 import re
 from bs4 import BeautifulSoup
 import urllib, urllib2
-
+import requests
+import html5lib
 # Initialize the Flask application
 app = Flask(__name__)
+
+
+import sys
+reload(sys)  
+sys.setdefaultencoding('utf8')
+
 
 # Define a route for the default URL, which loads the form
 @app.route('/')
@@ -20,9 +27,9 @@ def form():
 @app.route('/List/', methods=['POST'])
 def List():
     inputprompt=request.form['prompt']
-
-    prompts = inputprompt.split()
-    prompt="+".join(prompts)
+    inputmetric=request.form['metric']
+    # prompts = inputprompt.split()
+    # prompt="+".join(prompts)
 
     # youtubeurl = "https://www.youtube.com/results?search_query=documentary+top+"+str(prompt)
     # # searchrequest = urllib2.Request(youtubeurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
@@ -35,7 +42,7 @@ def List():
 
 
     # use bing to find url of wikipedia list from prompt
-    bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+"+str(prompt)
+    bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(inputprompt)+"+by+"+str(inputmetric)
     searchrequest = urllib2.Request(bingurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
     urlfile = urllib2.urlopen(searchrequest)
     page = urlfile.read()
@@ -50,8 +57,7 @@ def List():
 
     l = soup.find('table', class_='wikitable')
     
-    # l = soup.find('table')
-    # print l
+    
     general=soup.find_all('p')[0:3]
     # rawitems = l.find_all('th', {'scope':'row'})[0:10]
     rawitems = l.find_all('tr')[0:15]
@@ -71,50 +77,79 @@ def List():
                 linkitem = scoperow[0].find('a', class_=lambda x: x != 'reference')
             else:
                 linkitem = item.find('a')
-                # data=item.find('td')
-            # print "data = %s" %data
+                
+
             print linkitem
             name = linkitem.contents[0]
 
             linkurl = linkitem['href']
-            print name
-
-            
-            #   name['href']="http://www.imdb.com/"+name['href']
+            print name         
             names.append(name)
 
-            # # names[counter]="http://www.imdb.com/"+names[counter]
-            # googlenames = str(item.find('a').get_text().encode('ascii','ignore'))
-            # googlenameslist = googlenames.split()
-            # googlenames = "+".join(googlenameslist)
-            # #   googleurl = "https://www.google.com/search?q=wikipedia+"+str(googlenames)+"+film"
-            # googleurl = "https://www.bing.com/search?q=wikipedia+"+str(googlenames)
-            #
-            # searchrequest = urllib2.Request(googleurl, None, {'User-Agent':'Mosilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
+            
+            query = name
+            query= query.split()
+            query='+'.join(query)
+            url = "http://www.bing.com/images/search?q=" +(inputprompt) + "+" + query + "&qft=+filterui:aspect-square"
+            print url
+            searchrequest = urllib2.Request(url, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
+            urlfile = urllib2.urlopen(searchrequest)
+            page = urlfile.read()
+            soup = BeautifulSoup(page)
+            divsoup = soup.find_all('div', class_='dg_u')[0:5]
+            
+
             wikiurl = "http://en.wikipedia.org" + str(linkurl)
-            # urlfile = urllib2.urlopen(linkurl)
-            # page = urlfile.read()
-            #
-            # soup=BeautifulSoup(page)
-            # # wikiurl=soup.find('h3', class_="r")
-            # # wikiurl=wikiurl.find('a')
-            # # wikiurl=wikiurl['href']
 
             deschtml=urllib.urlopen(wikiurl).read()
             soup=BeautifulSoup(deschtml)
             # k=(soup.find_all('div', class_='mw-content-ltr')[0]).find('p')
-            k=soup.find_all('div', class_='mw-content-ltr')[0].find_all('p', recursive=False)[0]
-            descs.append(k)
+            k=soup.find_all('div', class_='mw-content-ltr')[0].find_all('p', recursive=False)
+            
+            count1 = 1;
+            count2 = 0;
+            description = k[0].get_text()
+            breaking = " <br/> <br/> "
 
+            while (count1<len(k))&(count2<2):
+                # print "count=", count1
+                par = k[count1].get_text()
+                words = (par.split()) #split the paragraph into individual words
+                if inputmetric in words: #see if one of the words in the paragraph is the word we want
+                    description = description+breaking+par
+                    count2+=1
+                count1+=1
+
+            descs.append(description)
+
+
+            linkimg = divsoup[0].find('a')
+            linkimg = linkimg['m']
+            m = re.search('imgurl:"(.+?)"', linkimg)
+            imag = m.group(1)
+            print imag
+            imgs.append(imag)
             # img=soup.find('   div', class_='mw-content-ltr'    ).find('img')
-            img=soup.find('div', class_='mw-content-ltr').find('img', {'src' : re.compile(r'(jpe?g)$')})
-            imgs.append(img)
+            # img=soup.find('div', class_='mw-content-ltr').find('img', {'src' : re.compile(r'(jpe?g)$')})
 
-            counter=counter+1
-            #   descs.append(str(item.find('span', class_='outline').get_text()))
+            # counter=0
+            # def check_url(url):
+            #     return True
+            # while (not check_url(imag))&(counter<5):
+            #     counter+= 1
+            #     linkimg = divsoup[counter].find('a')
+            #     linkimg = linkimg['m']
+            #     print linkimg
+            #     m = re.search('imgurl:"(.+?)"', linkimg)
+            #     imag = m.group(1)
+            #     print imag
+
+            counter+=1
 
 
-    return render_template('form_action.html', prompt=inputprompt, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], general1 =general[0], general2 =general[1], general3 =general[2])
+
+
+    return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], general1 =general[0], general2 =general[1], general3 =general[2])
     # return render_template('form_action.html', prompt=prompt,name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9])
     # return render_template('form_action.html', prompt=prompt,name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9])
     # return render_template('form_action.html', prompt=prompt)

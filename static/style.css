@@ -66,9 +66,12 @@ div.content {
 div.description > *{
     vertical-align: top;
 }
+
+div.description {
+    margin-bottom: 30px;
+}
 div.textd{
     width:70%;
-    height: 300px;
     display: inline-block;
 }
 div.textd p {
@@ -77,4 +80,9 @@ div.textd p {
 
 div.imaged{
     display: inline-block;
+}
+
+div.imaged img{
+    max-width: 280px;
+    max-height: 280px;
 }
