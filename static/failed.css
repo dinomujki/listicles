@@ -1,0 +1,31 @@
+body {
+    font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+    color: black;
+    font-style: normal;
+	padding-top: 150px;
+    margin: 0px;
+    background: url("http://i67.tinypic.com/wv7huw.jpg") no-repeat;
+}
+.content h1 {
+	font-weight: lighter;
+	color: black;
+	text-align: center;
+	position: relative;
+    padding-top: 100px;
+}
+
+
+img.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content p
+{
+	color: #000;
+	font-size: 12px;
+	padding-top: 150px;
+	font-family: 'Open Sans', sans-serif;
+	text-align: center;
+}
