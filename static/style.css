@@ -46,7 +46,7 @@ div.content {
 #general {
     background-color: silver;
     width: 70%;
-    padding-left: 10%; 
+    padding-left: 10%;
     padding-right: 20%;
     padding-bottom: 50px;
     padding-top: 20px;
@@ -70,6 +70,11 @@ div.description > *{
 div.description {
     margin-bottom: 30px;
 }
+
+.infod{
+    font-weight: 800;
+}
+
 div.textd{
     width:70%;
     display: inline-block;
