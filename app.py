@@ -124,7 +124,7 @@ def List():
         if temp != []:
             tabledata.append(temp)
 
-    print tabledata
+    # print tabledata
 
     # rawitems = l.find_all('th', {'scope':'row'})[0:10]
     rawitems = wtable.find_all('tr')
@@ -173,12 +173,12 @@ def List():
             if len(query) > 1:
                 query = query.split()
                 query='+'.join(query)
-            url = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square"
+            url = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square+filterui:imagesize-wallpaper&FORM=R5IR3"
             print url
             searchrequest = urllib2.Request(url, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
             urlfile = urllib2.urlopen(searchrequest)
             page = urlfile.read()
-            soup = BeautifulSoup(page, 'lxml').find('body').find("div", {"id":"b_content"}).find('noscript')
+            soup = BeautifulSoup(page, 'lxml')
 
 
             divsoup = soup.find_all('div', class_='dg_u')
@@ -218,11 +218,14 @@ def List():
 
                 descs.append(description)
 
+                if (len(divsoup)>0):
+                    linkimg = divsoup[0].find('a')
+                    linkimg = linkimg['m']
+                    m = re.search('imgurl:"(.+?)"', linkimg)
+                    imag = m.group(1)
+                else:
+                    imag="None"
 
-                linkimg = divsoup[0].find('a')
-                linkimg = linkimg['m']
-                m = re.search('imgurl:"(.+?)"', linkimg)
-                imag = m.group(1)
                 print imag
                 imgs.append(imag)
 
