@@ -151,7 +151,7 @@ def List():
                 #     if len(item.find_all('a')) > 0:
                 #         linkitem = item.find('a', class_=lambda x: x != 'reference', recursive=False)
                 #     break
-                linkitem = item.find('a', class_=lambda x: x != 'reference', recursive=False)
+                linkitem = item.find('a', class_=lambda x: x != 'reference')
             else:
                 # linkitems = item.find_all('td')
                 # for item in linkitems:
@@ -160,7 +160,7 @@ def List():
                 #     break
                 linkitem = item.find('a')
 
-            # print linkitem
+            print linkitem
 
             name = linkitem.contents[0]
 
@@ -249,6 +249,7 @@ def List():
         names.append(" ")
         descs.append(" ")
         imgs.append(" ")
+        infos.append(" ")
         counter+=1
 
 
