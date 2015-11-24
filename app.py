@@ -34,7 +34,7 @@ def List():
     inputmetric=request.form['metric']
     prompts = inputmetric.split()
     prompt2="+".join(prompts)
-    
+
     # use bing to find url of wikipedia list from prompt
     bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)
     print bingurl
@@ -44,7 +44,6 @@ def List():
     soup = BeautifulSoup(page)
     wikiurl=soup.find('ol', id="b_results").a['href']
     print wikiurl
-
 
     # scrape wiki url
     html=urllib.urlopen(wikiurl).read()
@@ -85,7 +84,6 @@ def List():
     if (str(tempwtable.find('td').get_text())=="."):
         wtable=wikitables[counter+1]
 
-    # print wtable
 
     # found table, pull data
     tableheaders = []
@@ -93,29 +91,74 @@ def List():
 
     temp = []
 
+    # table headers
     trows = wtable.find_all('tr')
-    header = trows[0].find_all('th')
+    header = trows[0].find_all(['th','td'])
     for th in header:
         # if th.find('a'):
         #     temp.append(th.find('a').contents[0])
         # else:
         #     temp.append(th.text)
-        temp.append(th.get_text()   )
+        temp.append(th.get_text())
     temp.append("Wikipedia Link")
     tableheaders = temp
 
+    print tableheaders
+
+    # table data
     for row in trows[1:]:
         temp = []
         titems = row.find_all(['td', 'th'], recursive=False)
         for td in titems:
             # temp.append(td.renderContents())
-            temp.append(td.text)
 
-        scoperow = row.find_all('th', {'scope':'row'})
-        if len(scoperow) > 0:
-            linkitem = scoperow[0].find('a', class_=lambda x: x != 'reference', recursive=False)
-        else:
-            linkitem = row.find('a')
+            # unic = td.text
+            # print unic
+            # # print "WEEEE"
+            # # print unic
+            # # unic=unic.decode("utf8")
+            # # unic = unic.encode("ascii", ignore=True)
+            # # print unic
+            # s = "\N{BLACK SPADE SUIT}"
+            # print s
+            # if s in unic:
+            #     print "WEEE"
+            #     print td.text
+            #     td.text = unic.split(s)[1].encode('ascii')
+            #     print td.text
+
+            tdtemp = td.find_all(text=True, recursive=True)
+            if len(tdtemp) > 0 and '\xe2' in str(tdtemp[0]):
+                temp.append(tdtemp[1])
+                print 'dsafasdfsa'
+                print tdtemp[1]
+                if "(" in tdtemp[1]:
+                    print "found it"
+                    print tdtemp[1].split('(')[0]
+
+            else:
+                temp.append(td.text)
+
+        # scoperow = row.find_all('a', {'scope':'row'})
+        # if len(scoperow) > 0:
+        #     print scoperow
+        #     linkitems = scoperow[0].find_all('a', class_=lambda x: x != 'reference', recursive=True)
+        #     print linkitems
+        #     for item in linkitems:
+        #         if "cite" not in str(item) and "citation" not in str(item):
+        #             linkitem = item
+        #             print linkitem
+        #             break
+        # else:
+        linkitems = row.find_all('a')
+        # print "SDFSD"
+        # print linkitems
+        for item in linkitems:
+            if "cite" not in str(item) and "citation" not in str(item):
+                linkitem = item
+                # print linkitem
+                break
+
         # print linkitem
 
         if linkitem != None:
@@ -125,46 +168,80 @@ def List():
             tabledata.append(temp)
 
 
-    print tableheaders
-    # for item in tabledata:
-    #     print " "
-    #     print item
-    
     sorty = False
     for index, item in enumerate(tableheaders):
-        print item, index
-        if ("count" in item.lower())|("highest" in item.lower()):
-            for row in tabledata:
-                if row[index].isalnum():
-                    row[index] = float(row[index].replace(',', ''))
-            tabledata = sorted(tabledata, key=lambda x:x[index], reverse=True)
-            sorty = True
-            break
+        # print item, index
+
+        # if ("count" in item.lower())|("number" in item.lower()):
+        #     print "SDFSDFSDFSDFSDF"
+        #     tableheaders.append('sortKey')
+        #     for row in tabpledata:
+        #         temp = "".join(x for x in row[index] if x.isalnum())
+        #         temprowindex = temp.replace(',', "")
+        #         if temprowindex.isdigit():
+        #             row.append(float(row[index].replace(',', '')))
+        #     tabledata = sorted(tabledata, key=lambda x:x[-1], reverse=True)
+        #     sorty = True
+        #     break
         metricprompts = inputmetric.split()
         for metric in metricprompts:
-            print metric
             if metric.lower() in item.lower():
-                print"TRUEE"
-                for row in tabledata:
-                    if row[index].isalnum():
-                        row[index] = float(row[index].replace(',', ''))
-                tabledata = sorted(tabledata, key=lambda x:x[index], reverse=True)
-                sorty = True
-                break
+                if len([x for x in tabledata[2][index].split('[')[0] if x.isdigit()]) > 0:
+                    tableheaders.append('sortKey')
+                    print"TRUEE", tableheaders[index]
+                    for row in tabledata:
+                        # temp = row[index].split('(')[0]
+                        # temp = "".join(x for x in temp if x.isalnum())
+                        # temprowindex = temp.replace(',', "")
+                        # if temprowindex.isdigit():
+                        #     row.append(float(row[index].replace(',', '')))
+                        temp = row[index]
+                        if temp != "":
+                            print temp
+                            temp = temp.replace(',','')
+                            print temp
+                            temp = str(temp).split('[')[0]
+                            temp = temp.split('(')[0].strip()
+                            print temp
+                            temp = float(re.findall (r"^\d+?\.?\d+?$",temp)[0])
+                            print temp
+                            row.append(temp)
+                        else:
+                            row.append(float('inf') * -1)
+                    tabledata = sorted(tabledata, key=lambda x:x[-1], reverse=True)
+                    sorty = True
+                    break
         if sorty:
             break
 
-    # rawitems = l.find_all('th', {'scope':'row'})[0:10]
-    # rawitems = wtable.find_all('tr')
-    # print rawitems
+    if sorty == False:
+        for index, item in enumerate(tableheaders):
+            if len([x for x in tabledata[2][index].split('[')[0] if x.isdigit()]) > 0:
+                tableheaders.append('sortKey')
+                break;
+        for row in tabledata:
+            print row[index]
+            temp = str(row[index]).split('[')[0]
+            temp = temp.split('(')[0]
+            temp = float(re.findall (r"^\d+?\.\d+?$",temp)[0])
+            row.append(temp)
+            print row[index]
+        tabledata = sorted(tabledata, key=lambda x:x[-1], reverse=True)
+
+
+    # for item in tabledata:
+    #     print " "
+    #     print item
 
     names = []
     descs = []
     imgs = []
     infos = []
 
+
+
     for ind, row in enumerate(tabledata[0:10]):
-        getInfo(prompt1, row[-1], ind, names, descs, imgs, infos, tabledata, inputmetric, tableheaders)
+        getInfo(prompt1, row[-2], ind, names, descs, imgs, infos, tabledata, inputmetric, tableheaders)
 
 
     while (len(names)<11):
@@ -326,7 +403,7 @@ if __name__ == '__main__':
 
     #             linkitem = item.find('a', class_=lambda x: x != 'reference')
     #         else:
-                
+
     #             linkitem = item.find('a')
 
     #         print linkitem

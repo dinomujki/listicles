@@ -68,16 +68,21 @@ div.description > *{
 }
 
 div.description {
-    margin-bottom: 30px;
+    margin-bottom: 100px;
 }
 
 .infod{
     font-weight: 800;
+    display:inline-block;
+}
+
+div.infod {
+    width: 70%;
+    display: inline-block;
 }
 
 div.textd{
-    width:70%;
-    display: inline-block;
+    width:100%;
 }
 div.textd p {
     margin:0;
@@ -85,6 +90,7 @@ div.textd p {
 
 div.imaged{
     display: inline-block;
+    margin-bottom: 30px;
 }
 
 div.imaged img{
