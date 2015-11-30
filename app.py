@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+
 # We need to import request to access the details of the POST request
 # and render_template, to render our templates (form and response)
 # we'll use url_for to get some URLs for the app on the templates
+
+
 from flask import Flask, render_template, request, url_for
 import re
 from bs4 import BeautifulSoup
@@ -43,8 +47,8 @@ def List():
     page = urlfile.read()
     soup = BeautifulSoup(page, "lxml")
     wikiurl=soup.find('ol', id="b_results").a['href']
+    
     print wikiurl
-
     # scrape wiki url
     html=urllib.urlopen(wikiurl).read()
     soup=BeautifulSoup(html, "lxml")
@@ -56,8 +60,12 @@ def List():
     for item in general:
         generaldesc=generaldesc+breaking+item.get_text()
 
+    wikitables = soup.find_all('table', class_='wikitable')
+    # fail if no tables
+    if (len(wikitables)==0):
+        return render_template('failed.html')
 
-    wtable = getTable(soup)
+    wtable = getTable(wikitables)
     caption = wtable.find('caption')
     if caption==None:
         caption=""
@@ -74,9 +82,9 @@ def List():
         metricprompts = inputmetric.split()
         for metric in metricprompts:
             if metric.lower() in item.lower():
-                if len([x for x in tabledata[2][index].split('[')[0] if x.isdigit()]) > 0:
-                    print"TRUEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
-
+                # print "tabledata[2][index]=", tabledata[2][index]
+                if len([x for x in tabledata[2][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
+                    print"TRUEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
                     tableheaders.append('sortKey')
                     
                     for row in tabledata:
@@ -94,14 +102,14 @@ def List():
         #     print item
         #     print ""
         for index, item in enumerate(tableheaders):
-            print "index=",index
-            print "tabledata[2][index]=", tabledata[2][index]
-            if len([x for x in tabledata[2][index].split('[')[0] if x.isdigit()]) > 0:
-                temp =tabledata[0][index]
-                print temp
+            # print "index=",index
+            # print "tabledata[3][index]=", tabledata[3][index]
+            if len([x for x in tabledata[3][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
+                temp =tabledata[3][index]
+                print "sorttemp=", temp
                 if ("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
                     if (is_int(temp)):
-                        if (int(temp)==1)|(int(temp)==2)|(int(temp)==3):
+                        if (int(temp)==1)|(int(temp)==2)|(int(temp)==3)|(int(temp)==4):
                             tableheaders.append('sortKey')
                             for row in tabledata:
                                 row.append('sorted')
@@ -110,14 +118,14 @@ def List():
                         else:
                             tableheaders.append('sortKey')
                             break;
-                    else:
+                    elif ('360' not in temp):
                         tableheaders.append('sortKey')
                         break;
         if sorty == False:
-            print "index=", index
+            # print "index=", index
             # print "item = ", item
             for row in tabledata:
-                print row[index]
+                # print row[index]
                 putin = fixstringtofloat(row[index])
                 row.append(putin)
                 # print row[index]
@@ -140,23 +148,31 @@ def List():
 
 
     while (len(names)<11):
-            names.append("")
-            descs.append("")
-            imgs.append("")
-            infos.append("")
+        names.append("")
+    while (len(descs)<11):
+        descs.append("")
+    while (len(imgs)<11):
+        imgs.append("")
+    while (len(infos)<11):
+        infos.append("")
     # print names
 
+    # for item in tabledata:
+    #     print " "
+    #     print item
+
     print wikiurl
+    str(names)
+    str(names)
+    str(descs)
+    str(infos)
     return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, generaldesc=generaldesc, caption=caption, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], info0=infos[0], info1=infos[1], info2=infos[2], info3=infos[3], info4=infos[4], info5=infos[5], info6=infos[6], info7=infos[7], info8=infos[8], info9=infos[9])
     # return render_template('form_action.html', prompt=prompt,name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9])
     # return render_template('form_action.html', prompt=prompt,name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9])
     # return render_template('form_action.html', prompt=prompt)
 
-def getTable(soup):
-    wikitables = soup.find_all('table', class_='wikitable')
-    # fail if no tables
-    if (len(wikitables)==0):
-        return render_template('failed.html')
+def getTable(wikitables):
+    
 
     counter = 0
     wtable=wikitables[counter]
@@ -182,6 +198,7 @@ def getTable(soup):
     return wtable
 
 def getHeaders(wtable):
+    # print "wtable=",wtable
     tableheaders = []
     trows = wtable.find_all('tr')
     header = trows[0].find_all(['th','td'])
@@ -195,30 +212,45 @@ def getHeaders(wtable):
     # print tableheaders
     return tableheaders
 
+def fixstring(s):
+    # print s
+    s=s.split('[')[0]
+    s=s.replace('\n','')
+    s=s.split('(')[0]
+    # print s
+    if ('\xe2' in s):
+        counter = 0
+        temp = s
+        s=""
+        c=temp[counter]
+        while (c!='\xe2'):
+            counter+=1
+            c=temp[counter]
+        for c in temp[(counter+1):len(temp)]:
+            s+=c
+    s=unicode(s, errors='ignore')
+    s=s.encode('utf8', 'ignore')
+    # print s
+    return s
+                
+
 def getTabledata(wtable):
     tabledata = []
     trows = wtable.find_all('tr')
     for row in trows[1:]:
+        # print row.prettify()
         temp = []
         titems = row.find_all(['td', 'th'], recursive=False)
+        counter = 0
         for td in titems:
-            tdtemp = td.find_all(text=True, recursive=True)
-            found=""
-            for wanted in tdtemp:
-                wanted = str(wanted)
-                # print wanted
-                if (wanted!="0")&('\xe2' not in wanted)&('[' not in wanted):
-                    if '(' in wanted:
-                        found=wanted.split('(')[0]
-                    found=wanted
-                    break
+            tdstring = fixstring(str(td.get_text()))
+            # print "tdstring=",tdstring
+            temp.append(tdstring)
 
-            temp.append(found)
 
         linkitems = row.find_all('a')
         if len(linkitems)==0:
             linkitem=None
-            break
         else:
             for item in linkitems:
                 if "cite" not in str(item) and "citation" not in str(item):
@@ -230,9 +262,9 @@ def getTabledata(wtable):
             if temp != []:
                 tabledata.append(temp)
 
-    # for item in tabledata:
-    #     print " "
-    #     print item
+    for item in tabledata:
+        print " "
+        print item
     return tabledata
 
 def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, inputmetric, tableheaders):
@@ -262,7 +294,6 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
     divsoup = soup.find_all('div', class_='dg_u')
 
     wikiurl = "http://en.wikipedia.org" + str(linkurl)
-
     deschtml=urllib.urlopen(wikiurl).read()
     soup=BeautifulSoup(deschtml, "lxml")
     # k=(soup.find_all('div', class_='mw-content-ltr')[0]).find('p')
@@ -305,21 +336,6 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
             imag = None
         print imag
         imgs.append(imag)
-
-        # # img=soup.find('div', class_='mw-content-ltr').find('img')
-        # img=soup.find('div', class_='mw-content-ltr').find('img', {'src' : re.compile(r'(jpe?g)$')})
-        #
-        # counter=0
-        # def check_url(url):
-        #     return True
-        # while (not check_url(imag))&(counter<5):
-        #     counter+= 1
-        #     linkimg = divsoup[counter].find('a')
-        #     linkimg = linkimg['m']
-        #     print linkimg
-        #     m = re.search('imgurl:"(.+?)"', linkimg)
-        #     imag = m.group(1)
-        #     print imag
         print names
 
 def is_int(s):
@@ -331,31 +347,31 @@ def is_int(s):
 
 def fixstringtofloat(s):
     temp=str(s)
+    # print "temp=",temp
+
     if temp != "":
         temp = temp.split('[')[0]
         temp = temp.split('(')[0]
         temp = temp.split('-')[0]
+        temp = temp.split('–')[0]
+
         temp = temp.split('/')[0]
-        # temp = temp.split('\xa0')[0]
-        # temp = temp.split('\xc2')[0]
-        # temp = temp.split('%')[0]
-        # temp = temp.split('*')[0]
-        # if "$" in temp:
-        #     temp = temp.split('$')[1]
-        # temp = temp.replace(',','')
-        # temp = temp.strip()
 
         truetemp=""
         dotty=False
+        digity=False
         for c in temp:
             if (c.isdigit()):
                 truetemp+=c
+                digity=True
             elif (c=="."):
-                if not dotty:
-                    truetemp+=c
-                    dotty=True
-
-        # print "temp before float=",temp
+                if digity:
+                    if not dotty:
+                        truetemp+=c
+                        dotty=True
+            elif (c==" "):
+                if digity:
+                    break
         # print "truetemp=",truetemp
         if len(truetemp)>1:
             truetemp = float(re.findall(r"^\d+?\.?\d+?$",truetemp)[0])
@@ -363,7 +379,6 @@ def fixstringtofloat(s):
             truetemp=float(truetemp)
         else:
             truetemp = (float('inf') * -1)
-        # print temp
         return truetemp
     else:
         return (float('inf') * -1)
