@@ -73,29 +73,38 @@ def List():
     tableheaders = getHeaders(wtable)
 
     tabledata = getTabledata(wtable)
-
-
-
+    
     sorty = False
-    for index, item in enumerate(tableheaders):
 
-        metricprompts = inputmetric.split()
-        for metric in metricprompts:
-            if metric.lower() in item.lower():
-                # print "tabledata[2][index]=", tabledata[2][index]
-                if len([x for x in tabledata[2][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
-                    print"TRUEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
-                    tableheaders.append('sortKey')
-                    
-                    for row in tabledata:
-                        putin = fixstringtofloat(row[index])
-                        row.append(putin)
+    if sorty == False:
+        for index, item in enumerate(tableheaders):
+            if "rank" in tableheaders[index].lower():
+                tableheaders.append('sortKey')
+                for row in tabledata:
+                    row.append('sorted')
+                sorty=True;
+                break
+    
+    if sorty == False:
+        for index, item in enumerate(tableheaders):
 
-                    tabledata = sorted(tabledata, key=lambda x:x[-1], reverse=True)
-                    sorty = True
-                    break
-        if sorty:
-            break
+            metricprompts = inputmetric.split()
+            for metric in metricprompts:
+                if metric.lower() in item.lower():
+                    # print "tabledata[2][index]=", tabledata[2][index]
+                    if len([x for x in tabledata[2][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
+                        print"TRUEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
+                        tableheaders.append('sortKey')
+                        
+                        for row in tabledata:
+                            putin = fixstringtofloat(row[index])
+                            row.append(putin)
+
+                        tabledata = sorted(tabledata, key=lambda x:x[-1], reverse=True)
+                        sorty = True
+                        break
+            if sorty:
+                break
 
     if sorty == False:
         # for item in tabledata:
@@ -106,7 +115,7 @@ def List():
             # print "tabledata[3][index]=", tabledata[3][index]
             if len([x for x in tabledata[3][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
                 temp =tabledata[3][index]
-                print "sorttemp=", temp
+                # print "sorttemp=", temp
                 if ("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
                     if (is_int(temp)):
                         if (int(temp)==1)|(int(temp)==2)|(int(temp)==3)|(int(temp)==4):
