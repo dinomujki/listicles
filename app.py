@@ -4,6 +4,8 @@
 # and render_template, to render our templates (form and response)
 # we'll use url_for to get some URLs for the app on the templates
 
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 from flask import Flask, render_template, request, url_for
 import re
@@ -283,69 +285,82 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
     name = linkitem.contents[0]
 
     linkurl = linkitem['href']
-    print name
-    names.append(name)
-
-
-    query = str(name)
-    if len(query) > 1:
-        query = query.split()
-        query='+'.join(query)
-    url = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square+filterui:imagesize-large&FORM=R5IR3"
-    print url
-    searchrequest = urllib2.Request(url, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
-    urlfile = urllib2.urlopen(searchrequest)
-    page = urlfile.read()
-    # soup = BeautifulSoup(page, 'lxml').find('body').find("div", {"id":"b_content"})
-    soup = BeautifulSoup(page, 'lxml')
-
-
-    divsoup = soup.find_all('div', class_='dg_u')
-
     wikiurl = "http://en.wikipedia.org" + str(linkurl)
-    deschtml=urllib.urlopen(wikiurl).read()
-    soup=BeautifulSoup(deschtml, "lxml")
-    # k=(soup.find_all('div', class_='mw-content-ltr')[0]).find('p')
-    k=soup.find_all('div', class_='mw-content-ltr')[0].find_all('p', recursive=False)
-    if (len(k)==0):
-        descs.append(" ")
-        imgs.append("None")
+    print wikiurl
+    if 'endnote' in wikiurl:
+        goodurl=False
     else:
-        count1 = 1;
-        count2 = 0;
+        goodurl=True
 
-        breaking = " <br/> <br/> "
-        info = ""
-        for index, item in enumerate(tabledata[counter]):
-            temp = str(tableheaders[index]) + ": " + str(item) + "<br/>"
-            info += temp
-        info += breaking
-        infos.append(info)
-
-        description = k[0].get_text()
+    if goodurl:
+        print name
+        names.append(name)
 
 
-        while (count1<len(k))&(count2<2):
-            # print "count=", count1
-            par = k[count1].get_text()
-            words = (par.split()) #split the paragraph into individual words
-            if inputmetric in words: #see if one of the words in the paragraph is the word we want
-                description = description+breaking+par
-                count2+=1
-            count1+=1
+        query = str(name)
+        if len(query) > 1:
+            query = query.split()
+            query='+'.join(query)
+        url = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square+filterui:imagesize-large&FORM=R5IR3"
+        print url
+        searchrequest = urllib2.Request(url, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
+        urlfile = urllib2.urlopen(searchrequest)
+        page = urlfile.read()
+        # soup = BeautifulSoup(page, 'lxml').find('body').find("div", {"id":"b_content"})
+        soup = BeautifulSoup(page, 'lxml')
 
-        descs.append(description)
 
-        if len(divsoup) > 0:
-            linkimg = divsoup[0].find('a')
-            linkimg = linkimg['m']
-            m = re.search('imgurl:"(.+?)"', linkimg)
-            imag = m.group(1)
+        divsoup = soup.find_all('div', class_='dg_u')
+
+        
+        # goodurl=check_url(wikiurl)
+        deschtml=urllib.urlopen(wikiurl).read()
+        soup=BeautifulSoup(deschtml, "lxml")
+        # k=(soup.find_all('div', class_='mw-content-ltr')[0]).find('p')
+        k=soup.find_all('div', class_='mw-content-ltr')[0].find_all('p', recursive=False)
+        if (len(k)==0):
+            descs.append(" ")
+            imgs.append("None")
         else:
-            imag = None
-        print imag
-        imgs.append(imag)
-        print names
+            count1 = 1;
+            count2 = 0;
+
+            breaking = " <br/> <br/> "
+            info = ""
+            for index, item in enumerate(tabledata[counter]):
+                temp = str(tableheaders[index]) + ": " + str(item) + "<br/>"
+                info += temp
+            info += breaking
+            infos.append(info)
+
+            description = k[0].get_text()
+
+
+            while (count1<len(k))&(count2<2):
+                # print "count=", count1
+                par = k[count1].get_text()
+                words = (par.split()) #split the paragraph into individual words
+                if inputmetric in words: #see if one of the words in the paragraph is the word we want
+                    description = description+breaking+par
+                    count2+=1
+                count1+=1
+
+            descs.append(description)
+
+            if len(divsoup) > 0:
+                linkimg = divsoup[0].find('a')
+                linkimg = linkimg['m']
+                m = re.search('imgurl:"(.+?)"', linkimg)
+                imag = m.group(1)
+            else:
+                imag = None
+            print imag
+            imgs.append(imag)
+            print names
+    else:
+        descs.append("")
+        imgs.append("None")
+        infos.append("")
 
 def is_int(s):
     try: 
@@ -392,6 +407,21 @@ def fixstringtofloat(s):
     else:
         return (float('inf') * -1)
 
+
+def check_url(url):
+    val = URLValidator(verify_exists=False)
+    try:
+        val(url)
+        return True
+    except ValidationError:
+        return False
+    # try:
+    #     urllib2.urlopen(url)
+    #     return True
+    # except urllib2.HTTPError, e:
+    #     return False
+    # except urllib2.URLError, e:
+    #     return False
 # Run the app :)
 if __name__ == '__main__':
   app.debug = True
