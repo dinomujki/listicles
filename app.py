@@ -49,7 +49,7 @@ def List():
     page = urlfile.read()
     soup = BeautifulSoup(page, "lxml")
     wikiurl=soup.find('ol', id="b_results").a['href']
-    
+
     print wikiurl
     # scrape wiki url
     html=urllib.urlopen(wikiurl).read()
@@ -75,7 +75,7 @@ def List():
     tableheaders = getHeaders(wtable)
 
     tabledata = getTabledata(wtable)
-    
+
     sorty = False
 
     if sorty == False:
@@ -86,7 +86,7 @@ def List():
                     row.append('sorted')
                 sorty=True;
                 break
-    
+
     if sorty == False:
         for index, item in enumerate(tableheaders):
 
@@ -97,7 +97,7 @@ def List():
                     if len([x for x in tabledata[2][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
                         print"TRUEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
                         tableheaders.append('sortKey')
-                        
+
                         for row in tabledata:
                             putin = fixstringtofloat(row[index])
                             row.append(putin)
@@ -183,7 +183,7 @@ def List():
     # return render_template('form_action.html', prompt=prompt)
 
 def getTable(wikitables):
-    
+
 
     counter = 0
     wtable=wikitables[counter]
@@ -243,7 +243,7 @@ def fixstring(s):
     s=s.encode('utf8', 'ignore')
     # print s
     return s
-                
+
 
 def getTabledata(wtable):
     tabledata = []
@@ -312,7 +312,7 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
 
         divsoup = soup.find_all('div', class_='dg_u')
 
-        
+
         # goodurl=check_url(wikiurl)
         deschtml=urllib.urlopen(wikiurl).read()
         soup=BeautifulSoup(deschtml, "lxml")
@@ -327,8 +327,8 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
 
             breaking = " <br/> <br/> "
             info = ""
-            for index, item in enumerate(tabledata[counter]):
-                temp = str(tableheaders[index]) + ": " + str(item) + "<br/>"
+            for index, item in enumerate(tabledata[counter][:-1]):
+                temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
                 info += temp
             info += breaking
             infos.append(info)
@@ -363,7 +363,7 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         infos.append("")
 
 def is_int(s):
-    try: 
+    try:
         int(s)
         return True
     except ValueError:
