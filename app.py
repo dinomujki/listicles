@@ -42,7 +42,7 @@ def List():
     prompt2="+".join(prompts)
 
     # use bing to find url of wikipedia list from prompt
-    bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)
+    bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)+"+wikipedia"
     print bingurl
     # searchrequest = urllib2.Request(bingurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
     urlfile = urllib2.urlopen(bingurl)
@@ -84,6 +84,9 @@ def List():
                 tableheaders.append('sortKey')
                 for row in tabledata:
                     row.append('sorted')
+                    print row[index]
+                    row[index]=fixstringtoint(row[index])
+                tabledata = sorted(tabledata, key=lambda x:x[index], reverse=False)
                 sorty=True;
                 break
 
@@ -264,7 +267,7 @@ def getTabledata(wtable):
             linkitem=None
         else:
             for item in linkitems:
-                if "cite" not in str(item) and "citation" not in str(item):
+                if "cite" not in str(item) and "citation" not in str(item) and 'image' not in str(item):
                     linkitem = item
                     # print linkitem
                     break
@@ -273,9 +276,9 @@ def getTabledata(wtable):
             if temp != []:
                 tabledata.append(temp)
 
-    for item in tabledata:
-        print " "
-        print item
+    # for item in tabledata:
+    #     print " "
+    #     print item
     return tabledata
 
 def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, inputmetric, tableheaders):
@@ -317,11 +320,12 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         deschtml=urllib.urlopen(wikiurl).read()
         soup=BeautifulSoup(deschtml, "lxml")
         # k=(soup.find_all('div', class_='mw-content-ltr')[0]).find('p')
-        k=soup.find_all('div', class_='mw-content-ltr')[0].find_all('p', recursive=False)
+        k=soup.find_all('div', class_='mw-content-ltr')
         if (len(k)==0):
             descs.append(" ")
             imgs.append("None")
         else:
+            k=k[0].find_all('p', recursive=False)
             count1 = 1;
             count2 = 0;
 
@@ -332,18 +336,19 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
                 info += temp
             info += breaking
             infos.append(info)
-
-            description = k[0].get_text()
-
-
-            while (count1<len(k))&(count2<2):
-                # print "count=", count1
-                par = k[count1].get_text()
-                words = (par.split()) #split the paragraph into individual words
-                if inputmetric in words: #see if one of the words in the paragraph is the word we want
-                    description = description+breaking+par
-                    count2+=1
-                count1+=1
+            description=" "
+            if len(k)==0:
+                descs.append(" ")
+            else:
+                description = k[0].get_text()
+                while (count1<len(k))&(count2<2):
+                    # print "count=", count1
+                    par = k[count1].get_text()
+                    words = (par.split()) #split the paragraph into individual words
+                    if inputmetric in words: #see if one of the words in the paragraph is the word we want
+                        description = description+breaking+par
+                        count2+=1
+                    count1+=1
 
             descs.append(description)
 
@@ -369,7 +374,7 @@ def is_int(s):
     except ValueError:
         return False
 
-def fixstringtofloat(s):
+def fixstringtoint(s):
     temp=str(s)
     # print "temp=",temp
 
@@ -381,6 +386,29 @@ def fixstringtofloat(s):
 
         temp = temp.split('/')[0]
 
+        truetemp=""
+        for c in temp:
+            if (c.isdigit()):
+                truetemp+=c
+                
+        # print "truetemp=",truetemp
+        return float(truetemp)
+    else:
+        return (float('inf'))
+
+def fixstringtofloat(s):
+    temp=str(s)
+    # print "temp=",temp
+
+    if temp != "":
+        temp = temp.split('[')[0]
+        temp = temp.split('(')[0]
+        temp = temp.split('-')[0]
+        temp = temp.split('–')[0]
+
+        temp = temp.split('/')[0]
+        if '!' in temp:
+            temp = temp.split('!')[1]
         truetemp=""
         dotty=False
         digity=False
