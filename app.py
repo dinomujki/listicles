@@ -50,8 +50,10 @@ def List():
     soup = BeautifulSoup(page, "lxml")
     bingpage=soup.find('ol', id="b_results")
     wikiurls = bingpage.find_all('li', class_="b_algo")
-    wikiurl = wikiurls[0].a['href']
-    print "wikiurl", wikiurl
+    # for item in wikiurls:
+    #     print item
+    # wikiurl = wikiurls[0].a['href']
+    # print "wikiurl", wikiurl
     for link in wikiurls:
         # print "LALALLALALA"
         # print "link = ", link.a['href'].lower()
@@ -59,9 +61,9 @@ def List():
         if ('category' not in str(link.a['href']).lower()):
             wikiurl = link.a['href'].lower()
             break
-    
-    
     print wikiurl
+
+
     # scrape wiki url
     html=urllib.urlopen(wikiurl).read()
     soup=BeautifulSoup(html, "lxml")
@@ -73,40 +75,59 @@ def List():
     for item in general:
         generaldesc+=breaking+item.get_text()
 
+    # find tables on page, fail if no tables
     wikitables = soup.find_all('table', class_='wikitable')
-    # fail if no tables
     if (len(wikitables)==0):
         return render_template('failed.html')
 
+    # pull tables and caption if exists, pull data
     wtable = getTable(wikitables)
     caption = wtable.find('caption')
     if caption==None:
         caption=""
-    # found table, pull data
     tableheaders = getHeaders(wtable)
-
     tabledata = getTabledata(wtable)
 
+    # sort table data
+    tableheaders, tabledata = sortTableData(tableheaders, tabledata, inputmetric)
+
+
+    names = []
+    descs = []
+    imgs = []
+    infos = []
+    for ind, row in enumerate(tabledata[0:10]):
+        getInfo(prompt1, row[-2], ind, names, descs, imgs, infos, tabledata, inputmetric, tableheaders)
+
+
+    for item in [names, descs, imgs, infos]:
+        while len(item) < 11:
+            item.append("")
+        str(item)
+
+    return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, generaldesc=generaldesc, caption=caption, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], info0=infos[0], info1=infos[1], info2=infos[2], info3=infos[3], info4=infos[4], info5=infos[5], info6=infos[6], info7=infos[7], info8=infos[8], info9=infos[9])
+
+def sortTableData(tableheaders, tabledata, inputmetric):
     sorty = False
 
+    # table already sorted
+    for index, item in enumerate(tableheaders):
+        if "rank" in tableheaders[index].lower():
+            tableheaders.append('sortKey')
+            for row in tabledata:
+                row.append('sorted')
+                row[index]=fixstringtoint(row[index])
+            tabledata = sorted(tabledata, key=lambda x:x[index], reverse=False)
+            sorty=True;
+            break
+
+    # look for column that matches input metric to sort on
     if sorty == False:
         for index, item in enumerate(tableheaders):
-            if "rank" in tableheaders[index].lower():
-                tableheaders.append('sortKey')
-                for row in tabledata:
-                    row.append('sorted')
-                    row[index]=fixstringtoint(row[index])
-                tabledata = sorted(tabledata, key=lambda x:x[index], reverse=False)
-                sorty=True;
-                break
-
-    if sorty == False:
-        for index, item in enumerate(tableheaders):
-
             metricprompts = inputmetric.split()
             for metric in metricprompts:
                 if metric.lower() in item.lower():
-                    # print "tabledata[2][index]=", tabledata[2][index]
+                    # if column contains numerical values
                     if len([x for x in tabledata[2][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
                         print"TRUEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
                         tableheaders.append('sortKey')
@@ -121,12 +142,12 @@ def List():
             if sorty:
                 break
 
+    # try to find column to sort on
     if sorty == False:
-
         for index, item in enumerate(tableheaders):
+            # make sure this column contains numerical values
             if len([x for x in tabledata[3][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
-                temp =tabledata[3][index]
-
+                temp = tabledata[3][index]
                 if ("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
                     if (is_int(temp)):
                         if (int(temp)==1)|(int(temp)==2)|(int(temp)==3)|(int(temp)==4):
@@ -148,37 +169,9 @@ def List():
             tabledata = sorted(tabledata, key=lambda x:x[-1], reverse=True)
 
 
-    names = []
-    descs = []
-    imgs = []
-    infos = []
-
-
-
-    for ind, row in enumerate(tabledata[0:10]):
-        getInfo(prompt1, row[-2], ind, names, descs, imgs, infos, tabledata, inputmetric, tableheaders)
-
-
-    while (len(names)<11):
-        names.append("")
-    while (len(descs)<11):
-        descs.append("")
-    while (len(imgs)<11):
-        imgs.append("")
-    while (len(infos)<11):
-        infos.append("")
-
-    print wikiurl
-    str(names)
-    str(names)
-    str(descs)
-    str(infos)
-    return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, generaldesc=generaldesc, caption=caption, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], info0=infos[0], info1=infos[1], info2=infos[2], info3=infos[3], info4=infos[4], info5=infos[5], info6=infos[6], info7=infos[7], info8=infos[8], info9=infos[9])
-
+    return tableheaders, tabledata
 
 def getTable(wikitables):
-
-
     counter = 0
     wtable=wikitables[counter]
 
