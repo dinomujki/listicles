@@ -48,8 +48,19 @@ def List():
     urlfile = urllib2.urlopen(bingurl)
     page = urlfile.read()
     soup = BeautifulSoup(page, "lxml")
-    wikiurl=soup.find('ol', id="b_results").a['href']
-
+    bingpage=soup.find('ol', id="b_results")
+    wikiurls = bingpage.find_all('li', class_="b_algo")
+    wikiurl = wikiurls[0].a['href']
+    print "wikiurl", wikiurl
+    for link in wikiurls:
+        # print "LALALLALALA"
+        # print "link = ", link.a['href'].lower()
+        # print "what = ", ('category' in link.a['href'].lower())
+        if ('category' not in str(link.a['href']).lower()):
+            wikiurl = link.a['href'].lower()
+            break
+    
+    
     print wikiurl
     # scrape wiki url
     html=urllib.urlopen(wikiurl).read()
@@ -60,7 +71,7 @@ def List():
     generaldesc = " "
     breaking = " <br/> <br/> "
     for item in general:
-        generaldesc=generaldesc+breaking+item.get_text()
+        generaldesc+=breaking+item.get_text()
 
     wikitables = soup.find_all('table', class_='wikitable')
     # fail if no tables
@@ -84,7 +95,6 @@ def List():
                 tableheaders.append('sortKey')
                 for row in tabledata:
                     row.append('sorted')
-                    print row[index]
                     row[index]=fixstringtoint(row[index])
                 tabledata = sorted(tabledata, key=lambda x:x[index], reverse=False)
                 sorty=True;
@@ -112,15 +122,11 @@ def List():
                 break
 
     if sorty == False:
-        # for item in tabledata:
-        #     print item
-        #     print ""
+
         for index, item in enumerate(tableheaders):
-            # print "index=",index
-            # print "tabledata[3][index]=", tabledata[3][index]
             if len([x for x in tabledata[3][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
                 temp =tabledata[3][index]
-                # print "sorttemp=", temp
+
                 if ("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
                     if (is_int(temp)):
                         if (int(temp)==1)|(int(temp)==2)|(int(temp)==3)|(int(temp)==4):
@@ -136,19 +142,11 @@ def List():
                         tableheaders.append('sortKey')
                         break;
         if sorty == False:
-            # print "index=", index
-            # print "item = ", item
             for row in tabledata:
-                # print row[index]
                 putin = fixstringtofloat(row[index])
                 row.append(putin)
-                # print row[index]
             tabledata = sorted(tabledata, key=lambda x:x[-1], reverse=True)
 
-
-    # for item in tabledata:
-    #     print " "
-    #     print item
 
     names = []
     descs = []
@@ -169,11 +167,6 @@ def List():
         imgs.append("")
     while (len(infos)<11):
         infos.append("")
-    # print names
-
-    # for item in tabledata:
-    #     print " "
-    #     print item
 
     print wikiurl
     str(names)
@@ -181,9 +174,7 @@ def List():
     str(descs)
     str(infos)
     return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, generaldesc=generaldesc, caption=caption, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], info0=infos[0], info1=infos[1], info2=infos[2], info3=infos[3], info4=infos[4], info5=infos[5], info6=infos[6], info7=infos[7], info8=infos[8], info9=infos[9])
-    # return render_template('form_action.html', prompt=prompt,name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9])
-    # return render_template('form_action.html', prompt=prompt,name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9])
-    # return render_template('form_action.html', prompt=prompt)
+
 
 def getTable(wikitables):
 
@@ -212,26 +203,18 @@ def getTable(wikitables):
     return wtable
 
 def getHeaders(wtable):
-    # print "wtable=",wtable
     tableheaders = []
     trows = wtable.find_all('tr')
     header = trows[0].find_all(['th','td'])
     for th in header:
-        # if th.find('a'):
-        #     temp.append(th.find('a').contents[0])
-        # else:
-        #     temp.append(th.text)
         tableheaders.append(th.get_text())
     tableheaders.append("Wikipedia Link")
-    # print tableheaders
     return tableheaders
 
 def fixstring(s):
-    # print s
     s=s.split('[')[0]
     s=s.replace('\n','')
     s=s.split('(')[0]
-    # print s
     if ('\xe2' in s):
         counter = 0
         temp = s
@@ -244,7 +227,6 @@ def fixstring(s):
             s+=c
     s=unicode(s, errors='ignore')
     s=s.encode('utf8', 'ignore')
-    # print s
     return s
 
 
@@ -276,15 +258,9 @@ def getTabledata(wtable):
             if temp != []:
                 tabledata.append(temp)
 
-    # for item in tabledata:
-    #     print " "
-    #     print item
     return tabledata
 
 def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, inputmetric, tableheaders):
-    # for item in tabledata:
-    #     print item
-    # print linkitem
     name = linkitem.contents[0]
 
     linkurl = linkitem['href']
@@ -309,7 +285,6 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         searchrequest = urllib2.Request(url, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
         urlfile = urllib2.urlopen(searchrequest)
         page = urlfile.read()
-        # soup = BeautifulSoup(page, 'lxml').find('body').find("div", {"id":"b_content"})
         soup = BeautifulSoup(page, 'lxml')
 
 
@@ -319,7 +294,6 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         # goodurl=check_url(wikiurl)
         deschtml=urllib.urlopen(wikiurl).read()
         soup=BeautifulSoup(deschtml, "lxml")
-        # k=(soup.find_all('div', class_='mw-content-ltr')[0]).find('p')
         k=soup.find_all('div', class_='mw-content-ltr')
         if (len(k)==0):
             descs.append(" ")
@@ -342,7 +316,6 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
             else:
                 description = k[0].get_text()
                 while (count1<len(k))&(count2<2):
-                    # print "count=", count1
                     par = k[count1].get_text()
                     words = (par.split()) #split the paragraph into individual words
                     if inputmetric in words: #see if one of the words in the paragraph is the word we want
@@ -376,7 +349,6 @@ def is_int(s):
 
 def fixstringtoint(s):
     temp=str(s)
-    # print "temp=",temp
 
     if temp != "":
         temp = temp.split('[')[0]
@@ -390,16 +362,12 @@ def fixstringtoint(s):
         for c in temp:
             if (c.isdigit()):
                 truetemp+=c
-                
-        # print "truetemp=",truetemp
         return float(truetemp)
     else:
         return (float('inf'))
 
 def fixstringtofloat(s):
     temp=str(s)
-    # print "temp=",temp
-
     if temp != "":
         temp = temp.split('[')[0]
         temp = temp.split('(')[0]
@@ -424,7 +392,6 @@ def fixstringtofloat(s):
             elif (c==" "):
                 if digity:
                     break
-        # print "truetemp=",truetemp
         if len(truetemp)>1:
             truetemp = float(re.findall(r"^\d+?\.?\d+?$",truetemp)[0])
         elif len(truetemp)==1:
@@ -443,13 +410,7 @@ def check_url(url):
         return True
     except ValidationError:
         return False
-    # try:
-    #     urllib2.urlopen(url)
-    #     return True
-    # except urllib2.HTTPError, e:
-    #     return False
-    # except urllib2.URLError, e:
-    #     return False
+
 # Run the app :)
 if __name__ == '__main__':
   app.debug = True
