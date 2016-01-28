@@ -96,8 +96,8 @@ def List():
     descs = []
     imgs = []
     infos = []
-    for ind, row in enumerate(tabledata[0:10]):
-        getInfo(prompt1, row[-2], ind, names, descs, imgs, infos, tabledata, inputmetric, tableheaders)
+    for index, row in enumerate(tabledata[0:10]):
+        getInfo(prompt1, row[-2], index, names, descs, imgs, infos, tabledata, inputmetric, tableheaders)
 
 
     for item in [names, descs, imgs, infos]:
@@ -148,7 +148,7 @@ def sortTableData(tableheaders, tabledata, inputmetric):
             # make sure this column contains numerical values
             if len([x for x in tabledata[3][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
                 temp = tabledata[3][index]
-                if ("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
+                if ("title" not in tableheaders[index].lower())&("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
                     if (is_int(temp)):
                         if (int(temp)==1)|(int(temp)==2)|(int(temp)==3)|(int(temp)==4):
                             tableheaders.append('sortKey')
@@ -236,7 +236,9 @@ def getTabledata(wtable):
             # print "tdstring=",tdstring
             temp.append(tdstring)
 
-
+        linkitem = None
+        # print "linkitem=",linkitem
+        # print row
         linkitems = row.find_all('a')
         if len(linkitems)==0:
             linkitem=None
@@ -244,26 +246,48 @@ def getTabledata(wtable):
             for item in linkitems:
                 if "cite" not in str(item) and "citation" not in str(item) and 'image' not in str(item):
                     linkitem = item
-                    # print linkitem
+                    print "linkitem=",linkitem
                     break
-        if linkitem != None:
-            temp.append(linkitem)
-            if temp != []:
-                tabledata.append(temp)
 
+        
+        # if linkitem != None:
+        temp.append(linkitem)
+        if temp != []:
+            tabledata.append(temp)
+    # print tabledata[0:10]
     return tabledata
 
 def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, inputmetric, tableheaders):
-    name = linkitem.contents[0]
-
-    linkurl = linkitem['href']
-    wikiurl = "http://en.wikipedia.org" + str(linkurl)
-    print wikiurl
-    if 'endnote' in wikiurl:
-        goodurl=False
+    if linkitem == None:
+        goodurl = False;
+        breaking = " <br/> <br/> "
+        
+        info = ""
+        print "counter=", counter
+        for index, item in enumerate(tabledata[counter]):
+            temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
+            info += temp
+            print "info = ", info
+        info += breaking
+        infos.append(info)
+        descs.append("")
+        imgs.append("None")
+        names.append(tabledata[counter][0]) 
+        return   
     else:
-        goodurl=True
+        name = linkitem.contents[0]
+        linkurl = linkitem['href']
+        wikiurl = "http://en.wikipedia.org" + str(linkurl)
+        print wikiurl
+        goodurl=check_url(wikiurl)
 
+        if 'endnote' in wikiurl:
+            goodurl=False
+        else:
+            goodurl=True
+
+    print "linkitem =", linkitem
+    print "goodurl =", goodurl
     if goodurl:
         print name
         names.append(name)
@@ -283,8 +307,6 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
 
         divsoup = soup.find_all('div', class_='dg_u')
 
-
-        # goodurl=check_url(wikiurl)
         deschtml=urllib.urlopen(wikiurl).read()
         soup=BeautifulSoup(deschtml, "lxml")
         k=soup.find_all('div', class_='mw-content-ltr')
@@ -298,9 +320,11 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
 
             breaking = " <br/> <br/> "
             info = ""
-            for index, item in enumerate(tabledata[counter][:-1]):
+            print "counter=", counter
+            for index, item in enumerate(tabledata[counter]):
                 temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
                 info += temp
+                print "info = ", info
             info += breaking
             infos.append(info)
             description=" "
@@ -319,10 +343,17 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
             descs.append(description)
 
             if len(divsoup) > 0:
-                linkimg = divsoup[0].find('a')
-                linkimg = linkimg['m']
-                m = re.search('imgurl:"(.+?)"', linkimg)
-                imag = m.group(1)
+                # linkimg = divsoup[0].find('a')
+                linkimg=None
+                imgtag = divsoup[0].find('img')
+                if 'src2' in str(imgtag):
+                    linkimg = imgtag['src2']
+                elif 'src' in str(imgtag):
+                    linkimg = imgtag['src']
+                # m = re.search('imgurl:"(.+?)"', linkimg)
+                # linkimg = linkimg['src']
+                print "imag=",linkimg
+                imag = linkimg
             else:
                 imag = None
             print imag
@@ -397,11 +428,16 @@ def fixstringtofloat(s):
 
 
 def check_url(url):
-    val = URLValidator(verify_exists=False)
-    try:
-        val(url)
-        return True
-    except ValidationError:
+    # val = URLValidator(verify_exists=False)
+    # try:
+    #     val(url)
+    #     return True
+    # except ValidationError:
+    #     return False
+    if (url != ""):
+        if ("redlink=1" not in url):
+            return True
+    else:
         return False
 
 # Run the app :)
