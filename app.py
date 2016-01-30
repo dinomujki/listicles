@@ -42,30 +42,12 @@ def List():
     # find wikipedia link related to input prompts
     wikiurl = getWikiLink(prompt1, prompt2)
 
-    # # search bing for wikipedia list related to prompt, find wikipedia link
-    # bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)+"+wikipedia"
-    # print bingurl
-    # page = urllib2.urlopen(bingurl).read()
-    # soup = BeautifulSoup(page, "lxml")
-    # bingpage=soup.find('ol', id="b_results")
-    # wikiurls = bingpage.find_all('li', class_="b_algo")
-    # for link in wikiurls:
-    #     if ('category' not in str(link.a['href']).lower()):
-    #         wikiurl = link.a['href'].lower()
-    #         break
-    # print wikiurl
-
-
     # scrape wiki url
     html=urllib.urlopen(wikiurl).read()
     soup=BeautifulSoup(html, "lxml")
 
     # get general description for page
-    general=soup.find_all('p')[0:3]
-    generaldesc = " "
-    breaking = " <br/> <br/> "
-    for item in general:
-        generaldesc+=breaking+item.get_text()
+    generaldesc = getPageDescription(soup)
 
     # find tables on page, fail if no tables
     wikitables = soup.find_all('table', class_='wikitable')
@@ -112,6 +94,14 @@ def getWikiLink(prompt1, prompt2):
             break
     print wikiurl
     return wikiurl
+
+def getPageDescription():
+    general=soup.find_all('p')[0:3]
+    generaldesc = " "
+    breaking = " <br/> <br/> "
+    for item in general:
+        generaldesc+=breaking+item.get_text()
+    return generaldesc
 
 def sortTableData(tableheaders, tabledata, inputmetric):
     sorty = False
