@@ -125,7 +125,7 @@ def sortTableData(tableheaders, tabledata, inputmetric):
                 if metric.lower() in item.lower():
                     # if column contains numerical values
                     if len([x for x in tabledata[2][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
-                        print"FOUND METRIC at =", tableheaders[index]
+                        print"TRUEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
                         tableheaders.append('sortKey')
 
                         for row in tabledata:
@@ -178,7 +178,6 @@ def getTable(wikitables):
         tempwtable = wtable
     while (len(tempwtable)<9):
         counter+=1
-
         if (counter==len(wikitables)):
             return render_template('failed.html')
         wtable=wikitables[counter]
@@ -237,117 +236,125 @@ def getTabledata(wtable):
             linkitem=None
         else:
             for item in linkitems:
-                if "cite" not in str(item) and "citation" not in str(item) and 'image' not in str(item) and 'thumbborder' not in str(item):
+                if "thumbborder" not in str(item) and "cite" not in str(item) and "citation" not in str(item) and 'image' not in str(item):
                     linkitem = item
                     break
 
 
+        # if linkitem != None:
         temp.append(linkitem)
         if temp != []:
             tabledata.append(temp)
     return tabledata
 
-def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, inputmetric, tableheaders):
-    if linkitem == None:
-        goodurl = False;
-        breaking = " <br/> <br/> "
 
-        info = ""
-        for index, item in enumerate(tabledata[counter]):
-            temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
-            info += temp
-        info += breaking
-        infos.append(info)
-        descs.append("")
-        imgs.append("None")
-        names.append(tabledata[counter][0])
-        return
+def getImage(imgs, name, prompt1):
+    query = str(name)
+    if len(query) > 1:
+        query = query.split()
+        query='+'.join(query)
+    url = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square+filterui:imagesize-large&FORM=R5IR3"
+    print url
+    searchrequest = urllib2.Request(url, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
+    urlfile = urllib2.urlopen(searchrequest)
+    page = urlfile.read()
+    soup = BeautifulSoup(page, 'lxml')
+    divsoup = soup.find_all('div', class_='dg_u')
+
+    if len(divsoup) > 0:
+        # linkimg = divsoup[0].find('a')
+        linkimg=None
+        imgtag = divsoup[0].find('img')
+        if 'src2' in str(imgtag):
+            linkimg = imgtag['src2']
+        elif 'src' in str(imgtag):
+            linkimg = imgtag['src']
+        # m = re.search('imgurl:"(.+?)"', linkimg)
+        # linkimg = linkimg['src']
+        imag = linkimg
     else:
-        # print('linkitem',linkitem)
-        # contents = linkitem.contents
-        # for item in contents:
-        #     if ('f')
+        imag = None
+    imgs.append(imag)
+
+def getItemDescription(descs, wikiurl, counter, tableheaders, tabledata, inputmetric):
+    # get descs
+    deschtml=urllib.urlopen(wikiurl).read()
+    soup=BeautifulSoup(deschtml, "lxml")
+    k=soup.find_all('div', class_='mw-content-ltr')
+    if (len(k)==0):
+        descs.append(" ")
+
+    else:
+        k=k[0].find_all('p', recursive=False)
+        count1 = 1;
+        count2 = 0;
+
+        breaking = " <br/> <br/> "
+        description=" "
+        if len(k)==0:
+            descs.append(" ")
+        else:
+            description = k[0].get_text()
+            while (count1<len(k))&(count2<2):
+                par = k[count1].get_text()
+                words = (par.split()) #split the paragraph into individual words
+                if inputmetric in words: #see if one of the words in the paragraph is the word we want
+                    description = description+breaking+par
+                    count2+=1
+                count1+=1
+
+        descs.append(description)
+
+def getItemInfo(infos, counter, tableheaders, tabledata):
+    breaking = "<br/> <br/>"
+    info = ""
+    for index, item in enumerate(tabledata[counter]):
+        temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
+        info += temp
+    info += breaking
+    infos.append(info)
+
+def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, inputmetric, tableheaders):
+    # check linkitem to separate wikipedia page
+    ## - if linkitem is None, don't get description
+
+    ## - if URL is bad (red link, endnote), don't get description
+
+    # pull info from table data
+
+    # try to get image
+
+    # try to get description from linkitem url
+
+    # if linkitem exists, get name from that. otherwise, pull name from tabledata
+
+    if linkitem == None:
+        name = tabledata[counter][1]
+        descs.append("")
+
+    else:
         name = linkitem.contents[0]
+
+        # check if we can get descs
         linkurl = linkitem['href']
         wikiurl = "http://en.wikipedia.org" + str(linkurl)
-        print 'wikiurl=', wikiurl
+        print wikiurl
         goodurl=check_url(wikiurl)
 
-        if 'endnote' in wikiurl:
-            goodurl=False
+        if goodurl:
+            getItemDescription(descs, wikiurl, counter, tableheaders, tabledata, inputmetric)
         else:
-            goodurl=True
-
-    if goodurl:
-        names.append(name)
-
-
-        query = str(name)
-        if len(query) > 1:
-            query = query.split()
-            query='+'.join(query)
-        bingimageurl = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square+filterui:imagesize-large&FORM=R5IR3"
-        print 'bingimageurl=',bingimageurl
-        searchrequest = urllib2.Request(bingimageurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
-        print 'searchrequest=',searchrequest
-        urlfile = urllib2.urlopen(searchrequest)
-        page = urlfile.read()
-        soup = BeautifulSoup(page, 'lxml')
-
-
-        divsoup = soup.find_all('div', class_='dg_u')
-
-        deschtml=urllib.urlopen(wikiurl).read()
-        soup=BeautifulSoup(deschtml, "lxml")
-        k=soup.find_all('div', class_='mw-content-ltr')
-        if (len(k)==0):
             descs.append(" ")
-            imgs.append("None")
-        else:
-            k=k[0].find_all('p', recursive=False)
-            count1 = 1;
-            count2 = 0;
 
-            breaking = " <br/> <br/> "
-            info = ""
-            for index, item in enumerate(tabledata[counter]):
-                temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
-                info += temp
-            info += breaking
-            infos.append(info)
-            description=" "
-            if len(k)==0:
-                descs.append(" ")
-            else:
-                description = k[0].get_text()
-                while (count1<len(k))&(count2<2):
-                    par = k[count1].get_text()
-                    words = (par.split()) #split the paragraph into individual words
-                    if inputmetric in words: #see if one of the words in the paragraph is the word we want
-                        description = description+breaking+par
-                        count2+=1
-                    count1+=1
+    # append name
+    names.append(name)
 
-            descs.append(description)
+    # get infos
+    getItemInfo(infos, counter, tableheaders, tabledata)
 
-            if len(divsoup) > 0:
-                # linkimg = divsoup[0].find('a')
-                linkimg=None
-                imgtag = divsoup[0].find('img')
-                if 'src2' in str(imgtag):
-                    linkimg = imgtag['src2']
-                elif 'src' in str(imgtag):
-                    linkimg = imgtag['src']
-                # m = re.search('imgurl:"(.+?)"', linkimg)
-                # linkimg = linkimg['src']
-                imag = linkimg
-            else:
-                imag = None
-            imgs.append(imag)
-    else:
-        descs.append("")
-        imgs.append("None")
-        infos.append("")
+    # get images
+    getImage(imgs, name, prompt1)
+
 
 def is_int(s):
     try:
@@ -413,17 +420,9 @@ def fixstringtofloat(s):
 
 
 def check_url(url):
-    # val = URLValidator(verify_exists=False)
-    # try:
-    #     val(url)
-    #     return True
-    # except ValidationError:
-    #     return False
-    if (url != ""):
-        if ("redlink=1" not in url):
-            return True
-    else:
-        return False
+    if (url != "") and ("redlink=1" not in url) and ('endnote' not in url):
+        return True
+    return False
 
 # Run the app :)
 if __name__ == '__main__':
