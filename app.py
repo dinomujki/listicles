@@ -95,7 +95,7 @@ def getWikiLink(prompt1, prompt2):
     print wikiurl
     return wikiurl
 
-def getPageDescription():
+def getPageDescription(soup):
     general=soup.find_all('p')[0:3]
     generaldesc = " "
     breaking = " <br/> <br/> "
