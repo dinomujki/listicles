@@ -116,8 +116,8 @@ def sortTableData(tableheaders, tabledata, inputmetric):
             tableheaders.append('sortKey')
             for row in tabledata:
                 row.append('sorted')
-                row[index]=fixstringtoint(row[index])
-            tabledata = sorted(tabledata, key=lambda x:x[index], reverse=False)
+            #     row[index]=fixstringtoint(row[index])
+            # tabledata = sorted(tabledata, key=lambda x:x[index], reverse=False)
             sorty=True;
             break
 
@@ -132,9 +132,12 @@ def sortTableData(tableheaders, tabledata, inputmetric):
                         print"TRUEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
                         tableheaders.append('sortKey')
 
+                        # print 'index=',index
                         for row in tabledata:
-                            putin = fixstringtofloat(row[index])
-                            row.append(putin)
+                            # print 'row=',row
+                            if (len(row)>index):
+                                putin = fixstringtofloat(row[index])
+                                row.append(putin)
 
                         tabledata = sorted(tabledata, key=lambda x:x[-1], reverse=True)
                         sorty = True
@@ -148,7 +151,7 @@ def sortTableData(tableheaders, tabledata, inputmetric):
             # make sure this column contains numerical values
             if len([x for x in tabledata[3][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
                 temp = tabledata[3][index]
-                if ("title" not in tableheaders[index].lower())&("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
+                if ("date" not in tableheaders[index].lower())&("title" not in tableheaders[index].lower())&("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
                     if (is_int(temp)):
                         if (int(temp)==1)|(int(temp)==2)|(int(temp)==3)|(int(temp)==4):
                             tableheaders.append('sortKey')
@@ -246,7 +249,7 @@ def getTabledata(wtable):
             for item in linkitems:
                 if "cite" not in str(item) and "citation" not in str(item) and 'image' not in str(item):
                     linkitem = item
-                    print "linkitem=",linkitem
+                    # print "linkitem=",linkitem
                     break
 
         
@@ -372,6 +375,7 @@ def is_int(s):
         return False
 
 def fixstringtoint(s):
+    print('s=',s)
     temp=str(s)
 
     if temp != "":
@@ -391,6 +395,7 @@ def fixstringtoint(s):
         return (float('inf'))
 
 def fixstringtofloat(s):
+    print('s=',s)
     temp=str(s)
     if temp != "":
         temp = temp.split('[')[0]
