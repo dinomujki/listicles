@@ -43,25 +43,19 @@ def List():
 
     # use bing to find url of wikipedia list from prompt
     bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)+"+wikipedia"
-    print bingurl
+    print 'bingurl=',bingurl
     # searchrequest = urllib2.Request(bingurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
     urlfile = urllib2.urlopen(bingurl)
     page = urlfile.read()
     soup = BeautifulSoup(page, "lxml")
     bingpage=soup.find('ol', id="b_results")
     wikiurls = bingpage.find_all('li', class_="b_algo")
-    # for item in wikiurls:
-    #     print item
-    # wikiurl = wikiurls[0].a['href']
-    # print "wikiurl", wikiurl
+   
     for link in wikiurls:
-        # print "LALALLALALA"
-        # print "link = ", link.a['href'].lower()
-        # print "what = ", ('category' in link.a['href'].lower())
         if ('category' not in str(link.a['href']).lower()):
             wikiurl = link.a['href'].lower()
             break
-    print wikiurl
+    print 'wikiurl=',wikiurl
 
 
     # scrape wiki url
@@ -129,12 +123,10 @@ def sortTableData(tableheaders, tabledata, inputmetric):
                 if metric.lower() in item.lower():
                     # if column contains numerical values
                     if len([x for x in tabledata[2][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
-                        print"TRUEEEEEEEEEEEEEEEEEEEEEEE", tableheaders[index]
+                        print"FOUND METRIC at =", tableheaders[index]
                         tableheaders.append('sortKey')
 
-                        # print 'index=',index
                         for row in tabledata:
-                            # print 'row=',row
                             if (len(row)>index):
                                 putin = fixstringtofloat(row[index])
                                 row.append(putin)
@@ -184,7 +176,7 @@ def getTable(wikitables):
         tempwtable = wtable
     while (len(tempwtable)<9):
         counter+=1
-        print "counter=",counter
+
         if (counter==len(wikitables)):
             return render_template('failed.html')
         wtable=wikitables[counter]
@@ -230,34 +222,27 @@ def getTabledata(wtable):
     tabledata = []
     trows = wtable.find_all('tr')
     for row in trows[1:]:
-        # print row.prettify()
         temp = []
         titems = row.find_all(['td', 'th'], recursive=False)
         counter = 0
         for td in titems:
             tdstring = fixstring(str(td.get_text()))
-            # print "tdstring=",tdstring
             temp.append(tdstring)
 
         linkitem = None
-        # print "linkitem=",linkitem
-        # print row
         linkitems = row.find_all('a')
         if len(linkitems)==0:
             linkitem=None
         else:
             for item in linkitems:
-                if "cite" not in str(item) and "citation" not in str(item) and 'image' not in str(item):
+                if "cite" not in str(item) and "citation" not in str(item) and 'image' not in str(item) and 'thumbborder' not in str(item):
                     linkitem = item
-                    # print "linkitem=",linkitem
                     break
 
         
-        # if linkitem != None:
         temp.append(linkitem)
         if temp != []:
             tabledata.append(temp)
-    # print tabledata[0:10]
     return tabledata
 
 def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, inputmetric, tableheaders):
@@ -266,11 +251,9 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         breaking = " <br/> <br/> "
         
         info = ""
-        print "counter=", counter
         for index, item in enumerate(tabledata[counter]):
             temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
             info += temp
-            print "info = ", info
         info += breaking
         infos.append(info)
         descs.append("")
@@ -278,10 +261,14 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         names.append(tabledata[counter][0]) 
         return   
     else:
+        # print('linkitem',linkitem)
+        # contents = linkitem.contents
+        # for item in contents:
+        #     if ('f')
         name = linkitem.contents[0]
         linkurl = linkitem['href']
         wikiurl = "http://en.wikipedia.org" + str(linkurl)
-        print wikiurl
+        print 'wikiurl=', wikiurl
         goodurl=check_url(wikiurl)
 
         if 'endnote' in wikiurl:
@@ -289,10 +276,7 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         else:
             goodurl=True
 
-    print "linkitem =", linkitem
-    print "goodurl =", goodurl
     if goodurl:
-        print name
         names.append(name)
 
 
@@ -300,9 +284,10 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         if len(query) > 1:
             query = query.split()
             query='+'.join(query)
-        url = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square+filterui:imagesize-large&FORM=R5IR3"
-        print url
-        searchrequest = urllib2.Request(url, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
+        bingimageurl = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square+filterui:imagesize-large&FORM=R5IR3"
+        print 'bingimageurl=',bingimageurl
+        searchrequest = urllib2.Request(bingimageurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
+        print 'searchrequest=',searchrequest
         urlfile = urllib2.urlopen(searchrequest)
         page = urlfile.read()
         soup = BeautifulSoup(page, 'lxml')
@@ -323,11 +308,9 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
 
             breaking = " <br/> <br/> "
             info = ""
-            print "counter=", counter
             for index, item in enumerate(tabledata[counter]):
                 temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
                 info += temp
-                print "info = ", info
             info += breaking
             infos.append(info)
             description=" "
@@ -355,13 +338,10 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
                     linkimg = imgtag['src']
                 # m = re.search('imgurl:"(.+?)"', linkimg)
                 # linkimg = linkimg['src']
-                print "imag=",linkimg
                 imag = linkimg
             else:
                 imag = None
-            print imag
             imgs.append(imag)
-            print names
     else:
         descs.append("")
         imgs.append("None")
@@ -375,7 +355,6 @@ def is_int(s):
         return False
 
 def fixstringtoint(s):
-    print('s=',s)
     temp=str(s)
 
     if temp != "":
@@ -395,7 +374,6 @@ def fixstringtoint(s):
         return (float('inf'))
 
 def fixstringtofloat(s):
-    print('s=',s)
     temp=str(s)
     if temp != "":
         temp = temp.split('[')[0]
