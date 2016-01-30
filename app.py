@@ -33,41 +33,21 @@ def form():
 
 @app.route('/List/', methods=['POST'])
 def List():
+    # get inputs
     inputprompt=request.form['prompt']
-    prompts = inputprompt.split()
-    prompt1="+".join(prompts)
-
+    prompt1="+".join(inputprompt.split())
     inputmetric=request.form['metric']
-    prompts = inputmetric.split()
-    prompt2="+".join(prompts)
+    prompt2="+".join(inputmetric.split())
 
-    # use bing to find url of wikipedia list from prompt
-    bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)+"+wikipedia"
-    print 'bingurl=',bingurl
-    # searchrequest = urllib2.Request(bingurl, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
-    urlfile = urllib2.urlopen(bingurl)
-    page = urlfile.read()
-    soup = BeautifulSoup(page, "lxml")
-    bingpage=soup.find('ol', id="b_results")
-    wikiurls = bingpage.find_all('li', class_="b_algo")
-   
-    for link in wikiurls:
-        if ('category' not in str(link.a['href']).lower()):
-            wikiurl = link.a['href'].lower()
-            break
-    print 'wikiurl=',wikiurl
-
+    # find wikipedia link related to input prompts
+    wikiurl = getWikiLink(prompt1, prompt2)
 
     # scrape wiki url
     html=urllib.urlopen(wikiurl).read()
     soup=BeautifulSoup(html, "lxml")
 
     # get general description for page
-    general=soup.find_all('p')[0:3]
-    generaldesc = " "
-    breaking = " <br/> <br/> "
-    for item in general:
-        generaldesc+=breaking+item.get_text()
+    generaldesc = getPageDescription(soup)
 
     # find tables on page, fail if no tables
     wikitables = soup.find_all('table', class_='wikitable')
@@ -100,6 +80,28 @@ def List():
         str(item)
 
     return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, generaldesc=generaldesc, caption=caption, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], info0=infos[0], info1=infos[1], info2=infos[2], info3=infos[3], info4=infos[4], info5=infos[5], info6=infos[6], info7=infos[7], info8=infos[8], info9=infos[9])
+
+def getWikiLink(prompt1, prompt2):
+    bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)+"+wikipedia"
+    print bingurl
+    page = urllib2.urlopen(bingurl).read()
+    soup = BeautifulSoup(page, "lxml")
+    bingpage=soup.find('ol', id="b_results")
+    wikiurls = bingpage.find_all('li', class_="b_algo")
+    for link in wikiurls:
+        if ('category' not in str(link.a['href']).lower()):
+            wikiurl = link.a['href'].lower()
+            break
+    print wikiurl
+    return wikiurl
+
+def getPageDescription(soup):
+    general=soup.find_all('p')[0:3]
+    generaldesc = " "
+    breaking = " <br/> <br/> "
+    for item in general:
+        generaldesc+=breaking+item.get_text()
+    return generaldesc
 
 def sortTableData(tableheaders, tabledata, inputmetric):
     sorty = False
@@ -239,7 +241,7 @@ def getTabledata(wtable):
                     linkitem = item
                     break
 
-        
+
         temp.append(linkitem)
         if temp != []:
             tabledata.append(temp)
@@ -249,7 +251,7 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
     if linkitem == None:
         goodurl = False;
         breaking = " <br/> <br/> "
-        
+
         info = ""
         for index, item in enumerate(tabledata[counter]):
             temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
@@ -258,8 +260,8 @@ def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, in
         infos.append(info)
         descs.append("")
         imgs.append("None")
-        names.append(tabledata[counter][0]) 
-        return   
+        names.append(tabledata[counter][0])
+        return
     else:
         # print('linkitem',linkitem)
         # contents = linkitem.contents
