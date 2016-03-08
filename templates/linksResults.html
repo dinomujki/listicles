@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <title>Listicles</title>
+        <link rel=stylesheet type=text/css href="/static/style.css">
+		<link href='http://fonts.googleapis.com/css?family=Mr+Dafoe' rel='stylesheet' type='text/css'>
+		<link href='https://fonts.googleapis.com/css?family=Cookie' rel='stylesheet' type='text/css'>
+    </head>
+    <body>
+		<div class="content">
+				<form method="post" action="{{ url_for('List') }}">
+				<button type="submit" value="{{link1|safe}}" name="link">{{link1|safe}}</button>
+				</form>
+				<br>
+
+				<form method="post" action="{{ url_for('List') }}">
+				<button type="submit" value="{{link2|safe}}" name="link">{{link2|safe}}</button>
+				</form>
+				<br>
+
+				<form method="post" action="{{ url_for('List') }}">
+				<button type="submit" value="{{link3|safe}}" name="link">{{link3|safe}}</button>
+				</form>
+				<br>
+
+				<form method="post" action="{{ url_for('List') }}">
+				<button type="submit" value="{{link4|safe}}" name="link">{{link4|safe}}</button>
+				</form>
+				<br>
+
+				<form method="post" action="{{ url_for('List') }}">
+				<button type="submit" value="{{link5|safe}}" name="link">{{link5|safe}}</button>
+				</form>
+				<br>
+
+				
+		</div>
+	</body>
+</html>

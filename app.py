@@ -20,11 +20,14 @@ from getInfo import *
 # Initialize the Flask application
 app = Flask(__name__)
 
+inputmetric = ''
+prompt1 = ''
+inputprompt = ''
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
-
 # Define a route for the default URL, which loads the form
+
 @app.route('/')
 def form():
     return render_template('form_submit.html')
@@ -32,18 +35,28 @@ def form():
 # Define a route for the action of the form, for example '/hello/'
 # We are also defining which type of requests this route is
 # accepting: POST requests in this case
-
-@app.route('/List/', methods=['POST'])
-def List():
-    # get inputs
+@app.route('/Results/', methods=['GET','POST'])
+def Results():
+    global inputprompt
     inputprompt=request.form['prompt']
+    global prompt1
     prompt1="+".join(inputprompt.split())
+    global inputmetric
     inputmetric=request.form['metric']
     prompt2="+".join(inputmetric.split())
-
     # find wikipedia link related to input prompts
-    wikiurl = getWikiLink(prompt1, prompt2)
+    wikilinks = getWikiLinks(prompt1, prompt2)
+    print wikilinks
+    while len(wikilinks)<5:
+        wikilinks.append("")
+    return render_template('linksResults.html', link1=wikilinks[0], link2 = wikilinks[1], link3 = wikilinks[2], link4 = wikilinks[3], link5=wikilinks[4]);
 
+@app.route('/List/', methods=['GET','POST'])
+def List():
+    # get inputs
+    link=request.form['link']
+    print link
+    wikiurl = link
     # scrape wiki url
     html=urllib.urlopen(wikiurl).read()
     soup=BeautifulSoup(html, "lxml")
@@ -63,7 +76,6 @@ def List():
         caption=""
     tableheaders = getHeaders(wtable)
     tabledata = getTabledata(wtable)
-
     # sort table data
     tableheaders, tabledata = sortTableData(tableheaders, tabledata, inputmetric)
 
@@ -80,22 +92,25 @@ def List():
         while len(item) < 11:
             item.append("")
         str(item)
-
+    print 'inputprompt=', inputprompt
+    print 'inputmetric=', inputmetric
     return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, generaldesc=generaldesc, caption=caption, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], info0=infos[0], info1=infos[1], info2=infos[2], info3=infos[3], info4=infos[4], info5=infos[5], info6=infos[6], info7=infos[7], info8=infos[8], info9=infos[9])
 
-def getWikiLink(prompt1, prompt2):
+def getWikiLinks(prompt1, prompt2):
     bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)+"+wikipedia"
     print bingurl
     page = urllib2.urlopen(bingurl).read()
     soup = BeautifulSoup(page, "lxml")
     bingpage=soup.find('ol', id="b_results")
     wikiurls = bingpage.find_all('li', class_="b_algo")
+    linkList = []
     for link in wikiurls:
-        if ('category' not in str(link.a['href']).lower()):
-            wikiurl = link.a['href'].lower()
-            break
-    print wikiurl
-    return wikiurl
+        linkstring = str(link.a['href']).lower()
+        if ('category' not in linkstring and 'wikipedia.org' in linkstring):
+            linkList.append(link.h2.a['href'])
+    for link in linkList:
+        print "link = ", link
+    return linkList
 
 def getPageDescription(soup):
     general=soup.find_all('p')[0:3]
@@ -147,7 +162,7 @@ def sortTableData(tableheaders, tabledata, inputmetric):
             # make sure this column contains numerical values
             if len([x for x in tabledata[3][index].split('[')[0].split('(')[0] if x.isdigit()]) > 0:
                 temp = tabledata[3][index]
-                if ("date" not in tableheaders[index].lower())&("title" not in tableheaders[index].lower())&("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower()):
+                if ("date" not in tableheaders[index].lower())&("title" not in tableheaders[index].lower())&("year" not in tableheaders[index].lower())&("period" not in tableheaders[index].lower())&("make" not in tableheaders[index].lower())&("model" not in tableheaders[index].lower())&("name" not in tableheaders[index].lower()):
                     if (is_int(temp)):
                         if (int(temp)==1)|(int(temp)==2)|(int(temp)==3)|(int(temp)==4):
                             tableheaders.append('sortKey')
@@ -248,102 +263,6 @@ def getTabledata(wtable):
         if temp != []:
             tabledata.append(temp)
     return tabledata
-
-
-# def getImage(imgs, name, prompt1):
-#     query = str(name)
-#     if len(query) > 1:
-#         query = query.split()
-#         query='+'.join(query)
-#     url = "http://www.bing.com/images/search?q=" + prompt1 + "+" + query + "&qft=+filterui:aspect-square+filterui:imagesize-large&FORM=R5IR3"
-#     print url
-#     searchrequest = urllib2.Request(url, None, {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_7_4) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11'})
-#     urlfile = urllib2.urlopen(searchrequest)
-#     page = urlfile.read()
-#     soup = BeautifulSoup(page, 'lxml')
-#     divsoup = soup.find_all('div', class_='dg_u')
-#
-#     if len(divsoup) > 0:
-#         # linkimg = divsoup[0].find('a')
-#         linkimg=None
-#         imgtag = divsoup[0].find('img')
-#         if 'src2' in str(imgtag):
-#             linkimg = imgtag['src2']
-#         elif 'src' in str(imgtag):
-#             linkimg = imgtag['src']
-#         # m = re.search('imgurl:"(.+?)"', linkimg)
-#         # linkimg = linkimg['src']
-#         imag = linkimg
-#     else:
-#         imag = None
-#     imgs.append(imag)
-#
-# def getItemDescription(descs, wikiurl, counter, tableheaders, tabledata, inputmetric):
-#     # get descs
-#     deschtml=urllib.urlopen(wikiurl).read()
-#     soup=BeautifulSoup(deschtml, "lxml")
-#     k=soup.find_all('div', class_='mw-content-ltr')
-#     if (len(k)==0):
-#         descs.append(" ")
-#
-#     else:
-#         k=k[0].find_all('p', recursive=False)
-#         count1 = 1;
-#         count2 = 0;
-#
-#         breaking = " <br/> <br/> "
-#         description=" "
-#         if len(k)==0:
-#             descs.append(" ")
-#         else:
-#             description = k[0].get_text()
-#             while (count1<len(k))&(count2<2):
-#                 par = k[count1].get_text()
-#                 words = (par.split()) #split the paragraph into individual words
-#                 if inputmetric in words: #see if one of the words in the paragraph is the word we want
-#                     description = description+breaking+par
-#                     count2+=1
-#                 count1+=1
-#
-#         descs.append(description)
-#
-# def getItemInfo(infos, counter, tableheaders, tabledata):
-#     breaking = "<br/> <br/>"
-#     info = ""
-#     for index, item in enumerate(tabledata[counter]):
-#         temp = str(tableheaders[index].split('[')[0]) + ": " + str(item) + "<br/>"
-#         info += temp
-#     info += breaking
-#     infos.append(info)
-#
-# def getInfo(prompt1, linkitem, counter, names, descs, imgs, infos, tabledata, inputmetric, tableheaders):
-#     if linkitem == None:
-#         name = tabledata[counter][1]
-#         descs.append("")
-#
-#     else:
-#         name = linkitem.contents[0]
-#
-#         # check if we can get descs
-#         linkurl = linkitem['href']
-#         wikiurl = "http://en.wikipedia.org" + str(linkurl)
-#         print wikiurl
-#         goodurl=check_url(wikiurl)
-#
-#         if goodurl:
-#             getItemDescription(descs, wikiurl, counter, tableheaders, tabledata, inputmetric)
-#         else:
-#             descs.append(" ")
-#
-#     # append name
-#     names.append(name)
-#
-#     # get infos
-#     getItemInfo(infos, counter, tableheaders, tabledata)
-#
-#     # get images
-#     getImage(imgs, name, prompt1)
-
 
 def is_int(s):
     try:
