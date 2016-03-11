@@ -5,30 +5,41 @@
 		<link href='http://fonts.googleapis.com/css?family=Mr+Dafoe' rel='stylesheet' type='text/css'>
 		<link href='https://fonts.googleapis.com/css?family=Cookie' rel='stylesheet' type='text/css'>
     </head>
+    <style type="text/css">
+    a {
+    	text-decoration: none;
+    	margin-left: 10px;
+    }
+    </style>
     <body>
 		<div class="content">
 				<form method="post" action="{{ url_for('List') }}">
 				<button type="submit" value="{{link1|safe}}" name="link">{{link1|safe}}</button>
+				<a href="{{link1|safe}}">Get a glimpse on Wikipedia</a>
 				</form>
 				<br>
 
 				<form method="post" action="{{ url_for('List') }}">
 				<button type="submit" value="{{link2|safe}}" name="link">{{link2|safe}}</button>
+				<a href="{{link2|safe}}">Get a glimpse on Wikipedia</a>
 				</form>
 				<br>
 
 				<form method="post" action="{{ url_for('List') }}">
 				<button type="submit" value="{{link3|safe}}" name="link">{{link3|safe}}</button>
+				<a href="{{link3|safe}}">Get a glimpse on Wikipedia</a>
 				</form>
 				<br>
 
 				<form method="post" action="{{ url_for('List') }}">
 				<button type="submit" value="{{link4|safe}}" name="link">{{link4|safe}}</button>
+				<a href="{{link4|safe}}">Get a glimpse on Wikipedia</a>
 				</form>
 				<br>
 
 				<form method="post" action="{{ url_for('List') }}">
 				<button type="submit" value="{{link5|safe}}" name="link">{{link5|safe}}</button>
+				<a href="{{link5|safe}}">Get a glimpse on Wikipedia</a>
 				</form>
 				<br>
 
