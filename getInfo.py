@@ -91,6 +91,8 @@ def getItemDescription(descs, wikiurl, counter, tableheaders, tabledata, inputme
         descs.append(description)
 
 def getItemInfo(infos, counter, tableheaders, tabledata):
+    # print "TABLEHEADERS:", tableheaders
+    # print "TABLEDATA:",tabledata
     breaking = "<br/> <br/>"
     info = ""
     for index, item in enumerate(tabledata[counter]):

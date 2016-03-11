@@ -14,6 +14,10 @@ import urllib, urllib2
 import requests
 import html5lib
 import lxml
+import cPickle as pickle
+import os
+import datetime
+import json
 
 from getInfo import *
 
@@ -53,48 +57,107 @@ def Results():
 
 @app.route('/List/', methods=['GET','POST'])
 def List():
+    global inputmetric
+    global inputprompt
+
     # get inputs
     link=request.form['link']
     print link
     wikiurl = link
-    # scrape wiki url
-    html=urllib.urlopen(wikiurl).read()
-    soup=BeautifulSoup(html, "lxml")
 
-    # get general description for page
-    generaldesc = getPageDescription(soup)
+    linkname = link.split('/')[-1]
+    cache_entry_name = 'cache/' + str(linkname) + ".p"
 
-    # find tables on page, fail if no tables
-    wikitables = soup.find_all('table', class_='wikitable')
-    if (len(wikitables)==0):
-        return render_template('failed.html')
+    # check to see if page is already cached
+    cache_list = loadCache()
+    if linkname in cache_list:
 
-    # pull tables and caption if exists, pull data
-    wtable = getTable(wikitables)
-    caption = wtable.find('caption')
-    if caption==None:
-        caption=""
-    tableheaders = getHeaders(wtable)
-    tabledata = getTabledata(wtable)
-    # sort table data
-    tableheaders, tabledata = sortTableData(tableheaders, tabledata, inputmetric)
+        print "CACHED ENTRY!!!!!!"
+
+        with open(cache_entry_name, 'r') as f:
+            cache_entry = json.load(f)
+
+        inputprompt = cache_entry['inputprompt']
+        inputmetric = cache_entry['inputmetric']
+        generaldesc = cache_entry['generaldesc']
+        caption = cache_entry['caption']
+        imgs = cache_entry['imgs']
+        names = cache_entry['names']
+        descs = cache_entry['descs']
+        infos = cache_entry['infos']
+
+    else:
+        # scrape wiki url
+        html=urllib.urlopen(wikiurl).read()
+        soup=BeautifulSoup(html, "lxml")
+
+        # get general description for page
+        generaldesc = getPageDescription(soup)
+
+        # find tables on page, fail if no tables
+        wikitables = soup.find_all('table', class_='wikitable')
+        if (len(wikitables)==0):
+            return render_template('failed.html')
+
+        # pull tables and caption if exists, pull data
+        wtable = getTable(wikitables)
+        caption = wtable.find('caption')
+        if caption==None:
+            caption=""
+        tableheaders = getHeaders(wtable)
+        tabledata = getTabledata(wtable)
+
+        # sort table data
+        tableheaders, tabledata = sortTableData(tableheaders, tabledata, inputmetric)
+
+        names = []
+        descs = []
+        imgs = []
+        infos = []
+        for index, row in enumerate(tabledata[0:10]):
+            getInfo(prompt1, row[-2], index, names, descs, imgs, infos, tabledata, inputmetric, tableheaders)
 
 
-    names = []
-    descs = []
-    imgs = []
-    infos = []
-    for index, row in enumerate(tabledata[0:10]):
-        getInfo(prompt1, row[-2], index, names, descs, imgs, infos, tabledata, inputmetric, tableheaders)
+        ### cache info
+        # make cache entry
+        cache_entry = {'inputprompt': inputprompt, 'inputmetric': inputmetric, 'generaldesc': generaldesc, 'caption': caption}
+        cache_entry['imgs'] = imgs
+        cache_entry['names'] = names
+        cache_entry['descs'] = descs
+        cache_entry['infos'] = infos
+
+        command = "touch " + cache_entry_name
+        os.system(command)
+
+        with open(cache_entry_name, 'w') as f:
+            f.write(json.dumps(cache_entry))
+
+        cache_list[linkname] = str(datetime.date.today())
+        with open('cache/cache_list.p', 'w') as f:
+            f.write(json.dumps(cache_list))
+
+        print "cached successfully!"
 
 
     for item in [names, descs, imgs, infos]:
         while len(item) < 11:
             item.append("")
         str(item)
+
     print 'inputprompt=', inputprompt
     print 'inputmetric=', inputmetric
-    return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, generaldesc=generaldesc, caption=caption, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7],image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], info0=infos[0], info1=infos[1], info2=infos[2], info3=infos[3], info4=infos[4], info5=infos[5], info6=infos[6], info7=infos[7], info8=infos[8], info9=infos[9])
+
+    return render_template('form_action.html', prompt=inputprompt, metric=inputmetric, generaldesc=generaldesc, caption=caption, image0 = imgs[0],image1 = imgs[1],image2 = imgs[2],image3 = imgs[3],image4 = imgs[4],image5 = imgs[5],image6 = imgs[6],image7 = imgs[7], image8 = imgs[8],image9 = imgs[9], name0=names[0], name1=names[1], name2=names[2],name3=names[3],name4=names[4],name5=names[5],name6=names[6],name7=names[7],name8=names[8],name9=names[9], desc0=descs[0], desc1=descs[1], desc2=descs[2], desc3=descs[3], desc4=descs[4], desc5=descs[5], desc6=descs[6], desc7=descs[7], desc8=descs[8], desc9=descs[9], info0=infos[0], info1=infos[1], info2=infos[2], info3=infos[3], info4=infos[4], info5=infos[5], info6=infos[6], info7=infos[7], info8=infos[8], info9=infos[9])
+
+def loadCache():
+    if os.path.isfile('cache/cache_list.p'):
+        with open('cache/cache_list.p', 'r') as f:
+            cache_list = json.load(f)
+    else:
+        cache_list = {'test_entry': 'test_entry'}
+        with open('cache/cache_list.p', 'w') as f:
+            f.write(json.dumps(cache_list))
+    return cache_list
 
 def getWikiLinks(prompt1, prompt2):
     bingurl = "https://www.bing.com/search?q=wikipedia+top+ten+list+of+"+str(prompt1)+"+by+"+str(prompt2)+"+wikipedia"
