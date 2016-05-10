@@ -154,6 +154,8 @@ def loadCache():
         with open('cache/cache_list.p', 'r') as f:
             cache_list = json.load(f)
     else:
+        if not os.path.exists('cache'):
+            os.mkdir('cache')
         cache_list = {'test_entry': 'test_entry'}
         with open('cache/cache_list.p', 'w') as f:
             f.write(json.dumps(cache_list))
